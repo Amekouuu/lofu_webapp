@@ -2,8 +2,9 @@ import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'login', pathMatch: 'full' },
+  { path: '', redirectTo: 'home', pathMatch: 'full' },
 
+  // Auth pages (no shell)
   {
     path: 'login',
     loadComponent: () =>
@@ -14,44 +15,63 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/auth/register/register').then((m) => m.Register),
   },
+
+  // Main app pages (wrapped in nav + footer shell)
   {
-    path: 'home',
+    path: '',
     loadComponent: () =>
-      import('./features/home/home/home').then((m) => m.Home),
+      import('./layouts/main-shell/main-shell').then((m) => m.MainShell),
+    children: [
+      {
+        path: 'home',
+        loadComponent: () =>
+          import('./features/home/home/home').then((m) => m.Home),
+      },
+      {
+        path: 'about',
+        loadComponent: () =>
+          import('./features/about/about').then((m) => m.About),
+      },
+      {
+        path: 'contact',
+        loadComponent: () =>
+          import('./features/contact/contact').then((m) => m.Contact),
+      },
+      // Combined items page
+      {
+        path: 'items',
+        loadComponent: () =>
+          import('./features/items/items').then((m) => m.Items),
+      },
+      // Legacy redirects — keep old URLs working
+      { path: 'lost',  redirectTo: 'items', pathMatch: 'full' },
+      { path: 'found', redirectTo: 'items', pathMatch: 'full' },
+      {
+        path: 'posts/:id',
+        loadComponent: () =>
+          import('./features/posts/detail/detail').then((m) => m.Detail),
+      },
+      {
+        path: 'post-item',
+        canActivate: [authGuard],
+        loadComponent: () =>
+          import('./features/posts/post-item/post-item').then((m) => m.PostItem),
+      },
+      {
+        path: 'profile',
+        canActivate: [authGuard],
+        loadComponent: () =>
+          import('./features/profile/profile/profile').then((m) => m.Profile),
+      },
+      {
+        path: 'settings',
+        canActivate: [authGuard],
+        loadComponent: () =>
+          import('./features/profile/settings/settings').then((m) => m.Settings),
+      },
+    ],
   },
-  {
-    path: 'lost',
-    loadComponent: () =>
-      import('./features/posts/lost/lost').then((m) => m.Lost),
-  },
-  {
-    path: 'found',
-    loadComponent: () =>
-      import('./features/posts/found/found').then((m) => m.Found),
-  },
-  {
-    path: 'posts/:id',
-    loadComponent: () =>
-      import('./features/posts/detail/detail').then((m) => m.Detail),
-  },
-  {
-    path: 'post-item',
-    canActivate: [authGuard],
-    loadComponent: () =>
-      import('./features/posts/post-item/post-item').then((m) => m.PostItem),
-  },
-  {
-    path: 'profile',
-    canActivate: [authGuard],
-    loadComponent: () =>
-      import('./features/profile/profile/profile').then((m) => m.Profile),
-  },
-  {
-    path: 'settings',
-    canActivate: [authGuard],
-    loadComponent: () =>
-      import('./features/profile/settings/settings').then((m) => m.Settings),
-  },
+
   {
     path: '**',
     loadComponent: () =>

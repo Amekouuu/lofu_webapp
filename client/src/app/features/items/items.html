@@ -1,0 +1,158 @@
+<div class="items-page">
+  <div class="items-inner">
+
+    <!-- ── Page header ── -->
+    <div class="items-header">
+      <div class="items-header-left">
+        <h1 class="items-title">
+          {{ activeTab() === 'Lost' ? 'Lost Items' : 'Found Items' }}
+        </h1>
+
+        <!-- Filter buttons with counts -->
+        <div class="filter-tabs">
+          <button
+            class="filter-btn"
+            [class.active]="activeTab() === 'Lost'"
+            (click)="switchTab('Lost')"
+          >
+            Lost
+            <span class="filter-count">{{ tabCounts().lost }}</span>
+          </button>
+          <button
+            class="filter-btn"
+            [class.active]="activeTab() === 'Found'"
+            (click)="switchTab('Found')"
+          >
+            Found
+            <span class="filter-count">{{ tabCounts().found }}</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Search bar -->
+      <div class="search-wrap">
+        <input
+          type="text"
+          class="search-input"
+          placeholder="Search item"
+          [(ngModel)]="searchQuery"
+          (input)="onSearchInput()"
+          (keydown.enter)="onSearchSubmit()"
+        />
+        <button class="search-btn" (click)="onSearchSubmit()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <circle cx="11" cy="11" r="8"/>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- ── Loading state ── -->
+    @if (isLoading()) {
+      <div class="state-wrap">
+        <div class="spinner"></div>
+        <p>Loading items...</p>
+      </div>
+    }
+
+    <!-- ── Empty state ── -->
+    @else if (posts().length === 0) {
+      <div class="state-wrap">
+        <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="1.5">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <p class="state-title">No {{ activeTab() === 'Lost' ? 'lost' : 'found' }} items found</p>
+        <p class="state-desc">
+          @if (searchQuery) {
+            Try a different search term.
+          } @else {
+            Check back later or be the first to post one!
+          }
+        </p>
+        <a routerLink="/post-item" class="btn-post-empty">Post an Item</a>
+      </div>
+    }
+
+    <!-- ── Items grid ── -->
+    @else {
+      <div class="items-grid">
+        @for (post of posts(); track post._id) {
+          <div class="item-card" [routerLink]="['/posts', post._id]">
+
+            <!-- Image area -->
+            <div class="card-image">
+              @if (getImageUrl(post)) {
+                <img [src]="getImageUrl(post)!" [alt]="post.itemName" />
+              } @else {
+                <div class="card-img-placeholder">
+                  <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#ffffff40" stroke-width="1.5">
+                    <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>
+                    <polyline points="21,15 16,10 5,21"/>
+                  </svg>
+                </div>
+              }
+            </div>
+
+            <!-- Card info -->
+            <div class="card-body">
+              <div class="card-title-row">
+                <h3 class="card-title">{{ post.itemName }}</h3>
+                <span class="card-badge" [class.badge-lost]="post.type === 'Lost'" [class.badge-found]="post.type === 'Found'">
+                  {{ post.type }}
+                </span>
+              </div>
+
+              <div class="card-divider"></div>
+
+              <div class="card-meta">
+                <p>
+                  <span class="meta-label">Last seen:</span>
+                  {{ formatDate(post.dateLostOrFound) }}
+                  @if (post.incidentTimeApprox) { <span> • {{ post.incidentTimeApprox }}</span> }
+                </p>
+                <p><span class="meta-label">Location:</span> {{ post.landmark }}</p>
+                <p><span class="meta-label">Description:</span> {{ post.description }}</p>
+              </div>
+
+              @if (post.status === 'Claim Pending') {
+                <p class="card-reward">Claim Pending</p>
+              }
+
+              <!-- Action button -->
+              <button
+                class="card-action-btn"
+                (click)="$event.stopPropagation(); onActionClick(post)"
+              >
+                {{ getActionLabel(post) }}
+              </button>
+            </div>
+
+          </div>
+        }
+      </div>
+
+      <!-- ── Pagination ── -->
+      @if (totalPages() > 1) {
+        <div class="pagination">
+          <button class="page-btn" (click)="goToPage(currentPage() - 1)" [disabled]="currentPage() === 1">Prev</button>
+
+          @for (page of getPageNumbers(); track $index) {
+            @if (page === '...') {
+              <span class="page-ellipsis">…</span>
+            } @else {
+              <button
+                class="page-btn"
+                [class.page-active]="page === currentPage()"
+                (click)="goToPage(+page)"
+              >{{ page }}</button>
+            }
+          }
+
+          <button class="page-btn" (click)="goToPage(currentPage() + 1)" [disabled]="currentPage() === totalPages()">Next</button>
+        </div>
+      }
+    }
+
+  </div>
+</div>

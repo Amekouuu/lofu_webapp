@@ -1,1 +1,324 @@
-<p>detail works!</p>
+<div class="detail-page">
+
+  <!-- ── Loading ── -->
+  @if (isLoading()) {
+    <div class="state-wrap">
+      <div class="spinner"></div>
+      <p>Loading post...</p>
+    </div>
+  }
+
+  <!-- ── Not found ── -->
+  @else if (notFound()) {
+    <div class="state-wrap">
+      <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="1.5">
+        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      <p class="state-title">Post not found</p>
+      <a routerLink="/items" class="btn-back-link">← Back to Items</a>
+    </div>
+  }
+
+  <!-- ── Post content ── -->
+  @else if (post()) {
+    <div class="detail-inner">
+
+      <!-- Back link -->
+      <a routerLink="/items" class="back-link">← Back to Items</a>
+
+      <div class="detail-layout">
+
+        <!-- ══ LEFT: Images + Info ══ -->
+        <div class="detail-left">
+
+          <!-- Image viewer -->
+          <div class="image-viewer">
+            @if (post()!.images.length > 0) {
+              <div class="main-image">
+                <img [src]="post()!.images[activeImageIndex()]" [alt]="post()!.itemName" />
+              </div>
+              @if (post()!.images.length > 1) {
+                <div class="image-thumbs">
+                  @for (img of post()!.images; track $index) {
+                    <div
+                      class="thumb"
+                      [class.thumb-active]="activeImageIndex() === $index"
+                      (click)="setActiveImage($index)"
+                    >
+                      <img [src]="img" [alt]="'Image ' + ($index + 1)" />
+                    </div>
+                  }
+                </div>
+              }
+            } @else {
+              <div class="no-image">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="1.5">
+                  <rect x="3" y="3" width="18" height="18" rx="2"/>
+                  <circle cx="8.5" cy="8.5" r="1.5"/>
+                  <polyline points="21,15 16,10 5,21"/>
+                </svg>
+                <p>No images uploaded</p>
+              </div>
+            }
+          </div>
+
+          <!-- Post info card -->
+          <div class="info-card">
+
+            <!-- Title row -->
+            <div class="info-title-row">
+              <h1 class="info-title">{{ post()!.itemName }}</h1>
+              <div class="info-badges">
+                <span class="type-badge" [class.badge-lost]="post()!.type === 'Lost'" [class.badge-found]="post()!.type === 'Found'">
+                  {{ post()!.type }}
+                </span>
+                <span class="status-badge" [class]="getStatusClass(post()!.status)">
+                  {{ post()!.status }}
+                </span>
+              </div>
+            </div>
+
+            <div class="info-divider"></div>
+
+            <!-- Detail rows -->
+            <div class="info-grid">
+              <div class="info-row">
+                <span class="info-label">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+                  </svg>
+                  Date {{ post()!.type === 'Lost' ? 'Lost' : 'Found' }}
+                </span>
+                <span class="info-value">{{ formatDate(post()!.dateLostOrFound) }}
+                  @if (post()!.incidentTimeApprox) { · {{ post()!.incidentTimeApprox }} }
+                </span>
+              </div>
+
+              <div class="info-row">
+                <span class="info-label">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+                  </svg>
+                  Location
+                </span>
+                <span class="info-value">
+                  {{ post()!.landmark }}
+                  @if (post()!.locationDetails) { — {{ post()!.locationDetails }} }
+                </span>
+              </div>
+
+              <div class="info-row">
+                <span class="info-label">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/>
+                  </svg>
+                  Category
+                </span>
+                <span class="info-value">{{ post()!.category }}</span>
+              </div>
+
+              @if (post()!.color) {
+                <div class="info-row">
+                  <span class="info-label">Color</span>
+                  <span class="info-value">{{ post()!.color }}</span>
+                </div>
+              }
+
+              @if (post()!.brand) {
+                <div class="info-row">
+                  <span class="info-label">Brand</span>
+                  <span class="info-value">{{ post()!.brand }}</span>
+                </div>
+              }
+            </div>
+
+            <!-- Description -->
+            <div class="description-wrap">
+              <p class="description-label">Description</p>
+              <p class="description-text">{{ post()!.description }}</p>
+            </div>
+
+            <!-- Author -->
+            <div class="author-wrap">
+              <div class="author-avatar">
+                @if (post()!.author.avatar) {
+                  <img [src]="post()!.author.avatar" [alt]="post()!.author.fullName" />
+                } @else {
+                  <span>{{ post()!.author.fullName[0] }}</span>
+                }
+              </div>
+              <div>
+                <p class="author-name">{{ post()!.author.fullName }}</p>
+                <p class="author-meta">&#64;{{ post()!.author.username }} · Posted {{ formatDate(post()!.createdAt) }}</p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ══ RIGHT: Claim section ══ -->
+        <div class="detail-right">
+
+          <!-- Post is resolved -->
+          @if (post()!.status === 'Resolved') {
+            <div class="resolved-card">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="1.5">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                <polyline points="22 4 12 14.01 9 11.01"/>
+              </svg>
+              <h3>This item has been returned!</h3>
+              <p>A claim was approved and this post is now resolved.</p>
+            </div>
+          }
+
+          <!-- Owner sees incoming claims -->
+          @else if (isOwner()) {
+            <div class="side-card">
+              <h2 class="side-title">Incoming Claims</h2>
+              <p class="side-subtitle">Review and approve the rightful owner.</p>
+
+              @if (claimsLoading()) {
+                <div class="state-loading"><div class="spinner-sm"></div><span>Loading claims...</span></div>
+              } @else if (incomingClaims().length === 0) {
+                <div class="empty-claims">
+                  <p>No claims yet on this post.</p>
+                </div>
+              } @else {
+                <div class="claims-list">
+                  @for (claim of incomingClaims(); track claim._id) {
+                    <div class="claim-card">
+                      <div class="claim-header">
+                        <div class="claim-user">
+                          <div class="claim-avatar">
+                            @if (claim.claimant.avatar) {
+                              <img [src]="claim.claimant.avatar" [alt]="claim.claimant.fullName" />
+                            } @else {
+                              <span>{{ claim.claimant.fullName[0] }}</span>
+                            }
+                          </div>
+                          <div>
+                            <p class="claim-name">{{ claim.claimant.fullName }}</p>
+                            <p class="claim-username">&#64;{{ claim.claimant.username }}</p>
+                          </div>
+                        </div>
+                        <span class="claim-badge" [class]="getStatusClass(claim.status)">{{ claim.status }}</span>
+                      </div>
+
+                      <div class="claim-detail">
+                        <p class="claim-label">Message</p>
+                        <p class="claim-value">{{ claim.message }}</p>
+                      </div>
+                      <div class="claim-detail">
+                        <p class="claim-label">Proof</p>
+                        <p class="claim-value">{{ claim.proofDetails }}</p>
+                      </div>
+                      @if (claim.contactInfo) {
+                        <div class="claim-detail">
+                          <p class="claim-label">Contact</p>
+                          <p class="claim-value">{{ claim.contactInfo }}</p>
+                        </div>
+                      }
+
+                      @if (claim.status === 'Pending') {
+                        <div class="claim-actions">
+                          <button class="btn-approve" (click)="approveClaim(claim._id)">✓ Approve</button>
+                          <button class="btn-reject"  (click)="rejectClaim(claim._id)">✕ Reject</button>
+                        </div>
+                      }
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          }
+
+          <!-- Not logged in -->
+          @else if (!isLoggedIn()) {
+            <div class="side-card login-prompt">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#5c6ef8" stroke-width="1.5">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+              <h3>Know something about this item?</h3>
+              <p>Log in to submit a claim and help return it to its owner.</p>
+              <a routerLink="/login" class="btn-login-prompt">Log in to Claim</a>
+            </div>
+          }
+
+          <!-- Already claimed -->
+          @else if (alreadyClaimed()) {
+            <div class="side-card already-claimed">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="1.5">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              <h3>Claim submitted!</h3>
+              <p>The post owner will review your claim. Check your profile for updates.</p>
+              <a routerLink="/profile" class="btn-view-claims">View My Claims</a>
+            </div>
+          }
+
+          <!-- Claim form -->
+          @else {
+            <div class="side-card">
+              <h2 class="side-title">{{ getActionLabel() }}</h2>
+              <p class="side-subtitle">Fill in the details below to submit your claim.</p>
+
+              @if (claimSuccess()) {
+                <div class="alert-success">{{ claimSuccess() }}</div>
+              }
+              @if (claimError()) {
+                <div class="alert-error">{{ claimError() }}</div>
+              }
+
+              <form (ngSubmit)="onClaimSubmit()" novalidate>
+
+                <div class="field-group">
+                  <label for="claimMessage">Your message <span class="required">*</span></label>
+                  <textarea
+                    id="claimMessage"
+                    [(ngModel)]="claimMessage"
+                    name="claimMessage"
+                    placeholder="Explain why this item belongs to you or what you know about it..."
+                    rows="3"
+                    [disabled]="claimLoading()"
+                  ></textarea>
+                </div>
+
+                <div class="field-group">
+                  <label for="claimProof">Proof of ownership / details <span class="required">*</span></label>
+                  <textarea
+                    id="claimProof"
+                    [(ngModel)]="claimProof"
+                    name="claimProof"
+                    placeholder="Describe identifying details only the real owner would know (serial number, contents, etc.)..."
+                    rows="3"
+                    [disabled]="claimLoading()"
+                  ></textarea>
+                </div>
+
+                <div class="field-group">
+                  <label for="claimContact">Contact info <span class="optional">(optional)</span></label>
+                  <input
+                    id="claimContact"
+                    type="text"
+                    [(ngModel)]="claimContact"
+                    name="claimContact"
+                    placeholder="Phone number, Facebook, etc."
+                    [disabled]="claimLoading()"
+                  />
+                </div>
+
+                <button type="submit" class="btn-submit-claim" [disabled]="claimLoading()">
+                  @if (claimLoading()) { Submitting… } @else { Submit Claim }
+                </button>
+
+              </form>
+            </div>
+          }
+
+        </div>
+      </div>
+    </div>
+  }
+
+</div>

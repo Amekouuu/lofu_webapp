@@ -1,1 +1,286 @@
-<p>post-item works!</p>
+<div class="post-item-page">
+  <div class="post-item-inner">
+
+    <!-- ── Page title ── -->
+    <div class="page-header">
+      <h1 class="page-title">
+        {{ postType === 'Lost' ? 'Lost Something? Let\'s Bring It Back' : 'Found Something? Help Return It' }}
+      </h1>
+      <p class="page-subtitle">Fill in the details below so the community can help.</p>
+    </div>
+
+    <!-- ── Stepper ── -->
+    <div class="stepper">
+      @for (step of steps; track step.num) {
+        <div class="step" [class.active]="currentStep() === step.num" [class.done]="currentStep() > step.num">
+          <div class="step-circle">
+            @if (currentStep() > step.num) {
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+            } @else {
+              {{ step.num }}
+            }
+          </div>
+          <span class="step-label">{{ step.label }}</span>
+        </div>
+        @if (step.num < totalSteps) {
+          <div class="step-line" [class.done]="currentStep() > step.num"></div>
+        }
+      }
+    </div>
+
+    <!-- ── Form card ── -->
+    <div class="form-card">
+
+      @if (errorMessage()) {
+        <div class="alert-error">{{ errorMessage() }}</div>
+      }
+
+      <!-- ════ STEP 1: Basic Info ════ -->
+      @if (currentStep() === 1) {
+        <div class="step-content">
+          <h2 class="step-title">What are you posting?</h2>
+
+          <!-- Lost / Found toggle -->
+          <div class="type-toggle">
+            <button
+              type="button"
+              class="type-btn"
+              [class.type-lost]="postType === 'Lost'"
+              (click)="postType = 'Lost'"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+              Lost Item
+            </button>
+            <button
+              type="button"
+              class="type-btn"
+              [class.type-found]="postType === 'Found'"
+              (click)="postType = 'Found'"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              Found Item
+            </button>
+          </div>
+
+          <!-- Item name -->
+          <div class="field-group">
+            <label for="itemName">Item Name <span class="required">*</span></label>
+            <input
+              id="itemName"
+              type="text"
+              [(ngModel)]="itemName"
+              name="itemName"
+              placeholder="e.g. Black leather wallet, iPhone 14, Coach bag"
+              maxlength="100"
+            />
+          </div>
+
+          <!-- Category -->
+          <div class="field-group">
+            <label for="category">Category <span class="required">*</span></label>
+            <select id="category" [(ngModel)]="category" name="category">
+              <option value="" disabled>Select a category</option>
+              @for (cat of categories; track cat) {
+                <option [value]="cat">{{ cat }}</option>
+              }
+            </select>
+          </div>
+
+          <!-- Description -->
+          <div class="field-group">
+            <label for="description">Description <span class="required">*</span></label>
+            <textarea
+              id="description"
+              [(ngModel)]="description"
+              name="description"
+              placeholder="Describe the item — color, size, distinguishing marks, condition..."
+              rows="4"
+              maxlength="500"
+            ></textarea>
+            <span class="char-count">{{ description.length }}/500</span>
+          </div>
+        </div>
+      }
+
+      <!-- ════ STEP 2: Details ════ -->
+      @if (currentStep() === 2) {
+        <div class="step-content">
+          <h2 class="step-title">Where and when?</h2>
+
+          <!-- Color + Brand -->
+          <div class="field-row">
+            <div class="field-group">
+              <label for="color">Color</label>
+              <input id="color" type="text" [(ngModel)]="color" name="color" placeholder="e.g. Black, Brown, Blue" />
+            </div>
+            <div class="field-group">
+              <label for="brand">Brand</label>
+              <input id="brand" type="text" [(ngModel)]="brand" name="brand" placeholder="e.g. Nike, Samsung, Coach" />
+            </div>
+          </div>
+
+          <!-- Landmark -->
+          <div class="field-group">
+            <label for="landmark">Landmark / Area <span class="required">*</span></label>
+            <select id="landmark" [(ngModel)]="landmark" name="landmark">
+              <option value="" disabled>Select a landmark</option>
+              @for (lm of landmarks; track lm) {
+                <option [value]="lm">{{ lm }}</option>
+              }
+            </select>
+          </div>
+
+          <!-- Location details -->
+          <div class="field-group">
+            <label for="locationDetails">Additional Location Details</label>
+            <input
+              id="locationDetails"
+              type="text"
+              [(ngModel)]="locationDetails"
+              name="locationDetails"
+              placeholder="e.g. Near the main entrance, 2nd floor food court"
+            />
+          </div>
+
+          <!-- Date + Time -->
+          <div class="field-row">
+            <div class="field-group">
+              <label for="dateLostOrFound">
+                Date {{ postType === 'Lost' ? 'Lost' : 'Found' }} <span class="required">*</span>
+              </label>
+              <input
+                id="dateLostOrFound"
+                type="date"
+                [(ngModel)]="dateLostOrFound"
+                name="dateLostOrFound"
+                [max]="today()"
+              />
+            </div>
+            <div class="field-group">
+              <label for="incidentTimeApprox">Approximate Time</label>
+              <select id="incidentTimeApprox" [(ngModel)]="incidentTimeApprox" name="incidentTimeApprox">
+                <option value="">Not sure</option>
+                @for (t of timeOptions; track t) {
+                  <option [value]="t">{{ t }}</option>
+                }
+              </select>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- ════ STEP 3: Images & Submit ════ -->
+      @if (currentStep() === 3) {
+        <div class="step-content">
+          <h2 class="step-title">Add photos (optional)</h2>
+          <p class="step-desc">Photos help people identify the item faster. You can upload up to 4 images.</p>
+
+          <!-- Upload area -->
+          <div class="upload-area" (click)="imageInput.click()" [class.upload-full]="imagePreviews.length >= 4">
+            <input
+              #imageInput
+              type="file"
+              accept="image/*"
+              multiple
+              style="display:none"
+              (change)="onImageSelect($event)"
+            />
+            @if (imagePreviews.length < 4) {
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="1.5">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <circle cx="8.5" cy="8.5" r="1.5"/>
+                <polyline points="21,15 16,10 5,21"/>
+              </svg>
+              <p class="upload-label">Click to upload images</p>
+              <p class="upload-hint">PNG, JPG up to 5MB each · {{ imagePreviews.length }}/4 uploaded</p>
+            } @else {
+              <p class="upload-label">Maximum images reached</p>
+            }
+          </div>
+
+          <!-- Previews -->
+          @if (imagePreviews.length > 0) {
+            <div class="image-previews">
+              @for (preview of imagePreviews; track $index) {
+                <div class="preview-wrap">
+                  <img [src]="preview" alt="Preview {{ $index + 1 }}" />
+                  <button type="button" class="preview-remove" (click)="removeImage($index)">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                      <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                  </button>
+                </div>
+              }
+            </div>
+          }
+
+          <!-- Summary -->
+          <div class="summary-box">
+            <h3 class="summary-title">Review your post</h3>
+            <div class="summary-grid">
+              <div class="summary-item">
+                <span class="summary-label">Type</span>
+                <span class="summary-value" [class.val-lost]="postType === 'Lost'" [class.val-found]="postType === 'Found'">{{ postType }}</span>
+              </div>
+              <div class="summary-item">
+                <span class="summary-label">Item</span>
+                <span class="summary-value">{{ itemName }}</span>
+              </div>
+              <div class="summary-item">
+                <span class="summary-label">Category</span>
+                <span class="summary-value">{{ category }}</span>
+              </div>
+              <div class="summary-item">
+                <span class="summary-label">Location</span>
+                <span class="summary-value">{{ landmark }}</span>
+              </div>
+              <div class="summary-item">
+                <span class="summary-label">Date</span>
+                <span class="summary-value">{{ dateLostOrFound }}</span>
+              </div>
+              @if (color) {
+                <div class="summary-item">
+                  <span class="summary-label">Color</span>
+                  <span class="summary-value">{{ color }}</span>
+                </div>
+              }
+              @if (brand) {
+                <div class="summary-item">
+                  <span class="summary-label">Brand</span>
+                  <span class="summary-value">{{ brand }}</span>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- ── Step navigation buttons ── -->
+      <div class="form-footer">
+        <div class="footer-left">
+          @if (currentStep() > 1) {
+            <button type="button" class="btn-back" (click)="prevStep()">← Back</button>
+          }
+          <button type="button" class="btn-reset" (click)="resetForm()">Reset</button>
+        </div>
+
+        <div class="footer-right">
+          @if (currentStep() < totalSteps) {
+            <button type="button" class="btn-next" (click)="nextStep()">Next →</button>
+          } @else {
+            <button type="button" class="btn-submit" (click)="onSubmit()" [disabled]="isLoading()">
+              @if (isLoading()) { Posting… } @else { Post! }
+            </button>
+          }
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

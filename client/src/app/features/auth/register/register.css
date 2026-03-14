@@ -1,0 +1,18 @@
+/* Register-specific overrides */
+
+/* On register, the illustration is on the LEFT, form on RIGHT */
+.register-page {
+  /* illustration left, form right — already in DOM order */
+}
+
+/* Logo top-right is positioned in auth-visual, hide mobile duplicate by default */
+.mobile-logo {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .mobile-logo {
+    display: flex;
+    margin-bottom: 2rem;
+  }
+}

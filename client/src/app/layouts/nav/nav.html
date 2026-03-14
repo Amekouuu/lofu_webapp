@@ -1,1 +1,69 @@
-<p>nav works!</p>
+<header class="nav">
+  <div class="nav-inner">
+
+    <a routerLink="/home" class="nav-logo">
+      <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M16 2L4 7v9c0 6.6 5.1 12.8 12 14.3C22.9 28.8 28 22.6 28 16V7L16 2z" fill="#5c6ef8" opacity="0.15"/>
+        <path d="M16 2L4 7v9c0 6.6 5.1 12.8 12 14.3C22.9 28.8 28 22.6 28 16V7L16 2z" stroke="#5c6ef8" stroke-width="2" stroke-linejoin="round"/>
+        <circle cx="16" cy="15" r="3.5" fill="#5c6ef8"/>
+        <path d="M16 18.5v4" stroke="#5c6ef8" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      LoFu
+    </a>
+
+    <nav class="nav-links">
+      <a routerLink="/home"     routerLinkActive="active" class="nav-link">Home</a>
+      <a routerLink="/items"     routerLinkActive="active" class="nav-link">Items</a>
+      <a routerLink="/post-item" routerLinkActive="active" class="nav-link">Post an Item</a>
+      <a routerLink="/about"    routerLinkActive="active" class="nav-link">About Us</a>
+      <a routerLink="/contact"  routerLinkActive="active" class="nav-link">Contact Us</a>
+    </nav>
+
+    <div class="nav-actions">
+      @if (isLoggedIn()) {
+        <a routerLink="/profile" class="nav-avatar" [title]="currentUser()?.fullName || 'Profile'">
+          @if (currentUser()?.avatar) {
+            <img [src]="currentUser()!.avatar" [alt]="currentUser()!.fullName" />
+          } @else {
+            <span>{{ (currentUser()?.fullName || 'U')[0].toUpperCase() }}</span>
+          }
+        </a>
+        <button class="btn-logout" (click)="logout()">Log out</button>
+      } @else {
+        <a routerLink="/login"    class="btn-nav-outline">Log in</a>
+        <a routerLink="/register" class="btn-nav-filled">Sign Up</a>
+      }
+    </div>
+
+    <button class="nav-hamburger" (click)="toggleMobile()" aria-label="Toggle menu">
+      @if (mobileOpen()) {
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      } @else {
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+      }
+    </button>
+
+  </div>
+
+  @if (mobileOpen()) {
+    <div class="nav-mobile" (click)="closeMobile()">
+      <a routerLink="/home"      class="nav-mobile-link">Home</a>
+      <a routerLink="/items"      class="nav-mobile-link">Items</a>
+      <a routerLink="/post-item" class="nav-mobile-link">Post an Item</a>
+      <a routerLink="/about"     class="nav-mobile-link">About Us</a>
+      <a routerLink="/contact"   class="nav-mobile-link">Contact Us</a>
+      <div class="nav-mobile-divider"></div>
+      @if (isLoggedIn()) {
+        <a routerLink="/profile" class="nav-mobile-link">My Profile</a>
+        <button class="nav-mobile-link nav-mobile-logout" (click)="logout()">Log out</button>
+      } @else {
+        <a routerLink="/login"    class="nav-mobile-link">Log in</a>
+        <a routerLink="/register" class="nav-mobile-link nav-mobile-signup">Sign Up</a>
+      }
+    </div>
+  }
+</header>

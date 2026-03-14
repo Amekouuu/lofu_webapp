@@ -1,1 +1,282 @@
-<p>profile works!</p>
+<div class="profile-page">
+  <div class="profile-inner">
+
+    <!-- ── Sidebar ── -->
+    <aside class="profile-sidebar">
+
+      <!-- Avatar -->
+      <div class="profile-avatar-wrap">
+        <div class="profile-avatar">
+          @if (currentUser()?.avatar) {
+            <img [src]="currentUser()!.avatar" [alt]="currentUser()!.fullName" />
+          } @else {
+            <span>{{ getInitial() }}</span>
+          }
+        </div>
+        <h2 class="profile-name">{{ currentUser()?.fullName }}</h2>
+        <p class="profile-username">&#64;{{ currentUser()?.username }}</p>
+        <span class="profile-role">{{ currentUser()?.role }}</span>
+      </div>
+
+      <!-- Tabs -->
+      <nav class="profile-nav">
+        <button class="profile-nav-btn" [class.active]="activeTab() === 'posts'" (click)="setTab('posts')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+          </svg>
+          My Posts
+          <span class="nav-count">{{ myPosts().length }}</span>
+        </button>
+
+        <button class="profile-nav-btn" [class.active]="activeTab() === 'incoming'" (click)="setTab('incoming')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/>
+            <path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>
+          </svg>
+          Incoming Claims
+          <span class="nav-count">{{ incomingClaims().length }}</span>
+        </button>
+
+        <button class="profile-nav-btn" [class.active]="activeTab() === 'myclaims'" (click)="setTab('myclaims')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+          My Claims
+          <span class="nav-count">{{ myClaims().length }}</span>
+        </button>
+
+        <button class="profile-nav-btn" [class.active]="activeTab() === 'edit'" (click)="setTab('edit')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+          Edit Profile
+        </button>
+      </nav>
+
+    </aside>
+
+    <!-- ── Main content ── -->
+    <main class="profile-main">
+
+      <!-- MY POSTS -->
+      @if (activeTab() === 'posts') {
+        <div class="section-header">
+          <h2 class="section-title">My Posts</h2>
+          <a routerLink="/post-item" class="btn-primary-sm">+ New Post</a>
+        </div>
+
+        @if (postsLoading()) {
+          <div class="state-loading"><div class="spinner"></div><span>Loading posts...</span></div>
+        } @else if (myPosts().length === 0) {
+          <div class="state-empty">
+            <p>You haven't posted anything yet.</p>
+            <a routerLink="/post-item" class="btn-primary-sm">Post an item</a>
+          </div>
+        } @else {
+          <div class="posts-list">
+            @for (post of myPosts(); track post._id) {
+              <div class="post-row">
+                <div class="post-img">
+                  @if (post.images && post.images.length > 0) {
+                    <img [src]="post.images[0]" [alt]="post.itemName" />
+                  } @else {
+                    <div class="post-img-placeholder"></div>
+                  }
+                </div>
+                <div class="post-info">
+                  <div class="post-info-top">
+                    <span class="post-type-badge" [class.badge-lost]="post.type === 'Lost'" [class.badge-found]="post.type === 'Found'">
+                      {{ post.type }}
+                    </span>
+                    <span class="post-status-badge" [class]="getStatusClass(post.status)">{{ post.status }}</span>
+                  </div>
+                  <h3 class="post-name">{{ post.itemName }}</h3>
+                  <p class="post-meta">{{ post.landmark }} · {{ formatDate(post.dateLostOrFound) }}</p>
+                </div>
+                <div class="post-actions">
+                  <a [routerLink]="['/posts', post._id]" class="btn-view">View</a>
+                  @if (deletingPostId() === post._id) {
+                    <div class="delete-confirm">
+                      <span>Delete?</span>
+                      <button class="btn-confirm-yes" (click)="deletePost(post._id)">Yes</button>
+                      <button class="btn-confirm-no" (click)="cancelDelete()">No</button>
+                    </div>
+                  } @else {
+                    <button class="btn-delete" (click)="confirmDelete(post._id)">Delete</button>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        }
+      }
+
+      <!-- INCOMING CLAIMS -->
+      @if (activeTab() === 'incoming') {
+        <div class="section-header">
+          <h2 class="section-title">Incoming Claims</h2>
+        </div>
+
+        @if (incomingLoading()) {
+          <div class="state-loading"><div class="spinner"></div><span>Loading claims...</span></div>
+        } @else if (incomingClaims().length === 0) {
+          <div class="state-empty"><p>No claims on your posts yet.</p></div>
+        } @else {
+          <div class="claims-list">
+            @for (claim of incomingClaims(); track claim._id) {
+              <div class="claim-card">
+                <div class="claim-card-header">
+                  <div class="claim-claimant">
+                    <div class="claimant-avatar">
+                      @if (claim.claimant.avatar) {
+                        <img [src]="claim.claimant.avatar" [alt]="claim.claimant.fullName" />
+                      } @else {
+                        <span>{{ claim.claimant.fullName[0] }}</span>
+                      }
+                    </div>
+                    <div>
+                      <p class="claimant-name">{{ claim.claimant.fullName }}</p>
+                      <p class="claimant-username">&#64;{{ claim.claimant.username }}</p>
+                    </div>
+                  </div>
+                  <span class="claim-status-badge" [class]="getStatusClass(claim.status)">{{ claim.status }}</span>
+                </div>
+
+                <div class="claim-meta">
+                  <p class="claim-item-name">For: <strong>{{ claim.post.itemName }}</strong></p>
+                  <p class="claim-date">{{ formatDate(claim.createdAt) }}</p>
+                </div>
+
+                <div class="claim-detail">
+                  <p class="claim-label">Message</p>
+                  <p class="claim-value">{{ claim.message }}</p>
+                </div>
+                <div class="claim-detail">
+                  <p class="claim-label">Proof</p>
+                  <p class="claim-value">{{ claim.proofDetails }}</p>
+                </div>
+                @if (claim.contactInfo) {
+                  <div class="claim-detail">
+                    <p class="claim-label">Contact</p>
+                    <p class="claim-value">{{ claim.contactInfo }}</p>
+                  </div>
+                }
+
+                @if (claim.status === 'Pending') {
+                  <div class="claim-card-actions">
+                    <button class="btn-approve" (click)="approveClaim(claim._id)">✓ Approve</button>
+                    <button class="btn-reject"  (click)="rejectClaim(claim._id)">✕ Reject</button>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        }
+      }
+
+      <!-- MY CLAIMS -->
+      @if (activeTab() === 'myclaims') {
+        <div class="section-header">
+          <h2 class="section-title">My Claims</h2>
+        </div>
+
+        @if (myClaimsLoading()) {
+          <div class="state-loading"><div class="spinner"></div><span>Loading...</span></div>
+        } @else if (myClaims().length === 0) {
+          <div class="state-empty">
+            <p>You haven't claimed any items yet.</p>
+            <a routerLink="/items" class="btn-primary-sm">Browse Items</a>
+          </div>
+        } @else {
+          <div class="claims-list">
+            @for (claim of myClaims(); track claim._id) {
+              <div class="claim-card">
+                <div class="claim-card-header">
+                  <p class="claim-item-name"><strong>{{ claim.post.itemName }}</strong></p>
+                  <span class="claim-status-badge" [class]="getStatusClass(claim.status)">{{ claim.status }}</span>
+                </div>
+                <div class="claim-meta">
+                  <span class="post-type-badge" [class.badge-lost]="claim.post.type === 'Lost'" [class.badge-found]="claim.post.type === 'Found'">
+                    {{ claim.post.type }}
+                  </span>
+                  <p class="claim-date">Claimed on {{ formatDate(claim.createdAt) }}</p>
+                </div>
+                <div class="claim-detail">
+                  <p class="claim-label">My message</p>
+                  <p class="claim-value">{{ claim.message }}</p>
+                </div>
+                <a [routerLink]="['/posts', claim.post._id]" class="btn-view" style="margin-top: 0.75rem; display: inline-block;">View Post</a>
+              </div>
+            }
+          </div>
+        }
+      }
+
+      <!-- EDIT PROFILE -->
+      @if (activeTab() === 'edit') {
+        <div class="section-header">
+          <h2 class="section-title">Edit Profile</h2>
+        </div>
+
+        <!-- Profile info form -->
+        <div class="edit-section">
+          <h3 class="edit-section-title">Account Information</h3>
+
+          @if (editSuccess()) { <div class="alert-success">{{ editSuccess() }}</div> }
+          @if (editError())   { <div class="alert-error">{{ editError() }}</div> }
+
+          <form (ngSubmit)="onUpdateProfile()" novalidate>
+            <div class="field-row">
+              <div class="field-group">
+                <label for="editFullName">Full Name</label>
+                <input id="editFullName" type="text" [(ngModel)]="editFullName" name="editFullName" [disabled]="editLoading()" />
+              </div>
+              <div class="field-group">
+                <label for="editUsername">Username</label>
+                <input id="editUsername" type="text" [(ngModel)]="editUsername" name="editUsername" [disabled]="editLoading()" />
+              </div>
+            </div>
+            <div class="field-group">
+              <label for="editEmail">Email</label>
+              <input id="editEmail" type="email" [(ngModel)]="editEmail" name="editEmail" [disabled]="editLoading()" />
+            </div>
+            <button type="submit" class="btn-save" [disabled]="editLoading()">
+              @if (editLoading()) { Saving… } @else { Save Changes }
+            </button>
+          </form>
+        </div>
+
+        <!-- Change password form -->
+        <div class="edit-section">
+          <h3 class="edit-section-title">Change Password</h3>
+
+          @if (passwordSuccess()) { <div class="alert-success">{{ passwordSuccess() }}</div> }
+          @if (passwordError())   { <div class="alert-error">{{ passwordError() }}</div> }
+
+          <form (ngSubmit)="onChangePassword()" novalidate>
+            <div class="field-group">
+              <label for="currentPassword">Current Password</label>
+              <input id="currentPassword" type="password" [(ngModel)]="currentPassword" name="currentPassword" [disabled]="passwordLoading()" />
+            </div>
+            <div class="field-row">
+              <div class="field-group">
+                <label for="newPassword">New Password</label>
+                <input id="newPassword" type="password" [(ngModel)]="newPassword" name="newPassword" [disabled]="passwordLoading()" />
+              </div>
+              <div class="field-group">
+                <label for="confirmNewPassword">Confirm New Password</label>
+                <input id="confirmNewPassword" type="password" [(ngModel)]="confirmNewPassword" name="confirmNewPassword" [disabled]="passwordLoading()" />
+              </div>
+            </div>
+            <button type="submit" class="btn-save" [disabled]="passwordLoading()">
+              @if (passwordLoading()) { Updating… } @else { Update Password }
+            </button>
+          </form>
+        </div>
+      }
+
+    </main>
+  </div>
+</div>

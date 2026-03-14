@@ -1,0 +1,11 @@
+/* Login-specific styles */
+
+.desktop-logo {
+  display: none; /* Logo shown inside auth-visual on desktop */
+}
+
+@media (max-width: 768px) {
+  .desktop-logo {
+    display: flex;
+  }
+}

@@ -1,1 +1,120 @@
-<p>home works!</p>
+<!-- ═══════════════════════════════════════════
+     HERO SECTION
+════════════════════════════════════════════ -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-text">
+      <h1 class="hero-title">
+        Find What's Lost.<br>
+        Return What's<br>
+        Found. Together.
+      </h1>
+      <p class="hero-desc">
+        LoFu is a community-powered lost and found app made for Angeles City —
+        helping neighbors quickly post, find, and return lost items through real local connections.
+      </p>
+      <a routerLink="/lost" class="btn-hero">Get started</a>
+    </div>
+    <div class="hero-image">
+      <!-- Replace with actual hero image -->
+      <div class="img-block hero-img-placeholder"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     WHY CHOOSE LOFU
+════════════════════════════════════════════ -->
+<section class="why-section">
+  <div class="section-inner">
+    <h2 class="section-title">The Heart of Our Community</h2>
+
+    <div class="why-grid">
+      <div class="why-left">
+        <h3 class="why-heading">Why Choose<br>Lofu?</h3>
+      </div>
+      <div class="why-features">
+        @for (feature of features; track feature.title) {
+          <div class="feature-card">
+            <h4 class="feature-title">{{ feature.title }}</h4>
+            <p class="feature-desc">{{ feature.desc }}</p>
+            <a routerLink="/lost" class="feature-link">More Info &nbsp;→</a>
+          </div>
+        }
+      </div>
+    </div>
+
+    <p class="why-quote">
+      LoFu is more than a list — it's a community-driven platform dedicated to bringing people and their belongings back together.
+    </p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     HIGHLIGHTS (Community Features)
+════════════════════════════════════════════ -->
+<section class="highlights-section">
+  <div class="section-inner">
+    <h2 class="section-title">Designed for a Helpful,<br>Honest Community</h2>
+
+    <div class="highlights-grid">
+
+      <!-- Lost & Found card -->
+      <div class="highlight-card highlight-dark">
+        <div class="highlight-header">
+          <span class="highlight-dot"></span>
+          <span class="highlight-label">Lost & Found</span>
+        </div>
+        <p class="highlight-desc">Browse items found in your area.</p>
+        <div class="highlight-img-wrap">
+          <div class="img-block highlight-img-placeholder"></div>
+        </div>
+      </div>
+
+      <!-- Verified Proof card -->
+      <div class="highlight-card highlight-light">
+        <div class="highlight-header">
+          <span class="highlight-dot"></span>
+          <span class="highlight-label highlight-label-bold">Verified Proof</span>
+        </div>
+        <p class="highlight-desc">Confirm ownership through photos.</p>
+        <div class="highlight-img-wrap">
+          <div class="img-block highlight-img-placeholder"></div>
+        </div>
+      </div>
+
+      <!-- Safe Meetups card -->
+      <div class="highlight-card highlight-light">
+        <div class="highlight-header">
+          <span class="highlight-dot"></span>
+          <span class="highlight-label">Safe Meetups</span>
+        </div>
+        <p class="highlight-desc">Connect with neighbors.</p>
+        <div class="highlight-img-wrap">
+          <div class="img-block highlight-img-placeholder"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     CTA BANNER
+════════════════════════════════════════════ -->
+<section class="cta-section">
+  <div class="cta-inner">
+    <div class="cta-text">
+      <h2 class="cta-title">Post. Find. Reunited.</h2>
+      <p class="cta-desc">
+        LoFu helps neighbors track lost items, verify claims, and manage returns efficiently —
+        ensuring every item finds its way back home.
+      </p>
+      <a routerLink="/post-item" class="btn-cta">Get started</a>
+    </div>
+    <div class="cta-image">
+      <!-- Replace with actual CTA illustration -->
+      <div class="img-block cta-img-placeholder"></div>
+    </div>
+  </div>
+</section>

@@ -1,1 +1,35 @@
-<p>footer works!</p>
+<footer class="footer">
+  <div class="footer-inner">
+
+    <div class="footer-brand">
+      <a routerLink="/home" class="footer-logo">
+        <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M16 2L4 7v9c0 6.6 5.1 12.8 12 14.3C22.9 28.8 28 22.6 28 16V7L16 2z" fill="#fff" opacity="0.15"/>
+          <path d="M16 2L4 7v9c0 6.6 5.1 12.8 12 14.3C22.9 28.8 28 22.6 28 16V7L16 2z" stroke="#fff" stroke-width="2" stroke-linejoin="round"/>
+          <circle cx="16" cy="15" r="3.5" fill="#fff"/>
+          <path d="M16 18.5v4" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        LoFu
+      </a>
+      <p class="footer-tagline">Angeles City's community-powered lost and found platform.</p>
+    </div>
+
+    <nav class="footer-nav">
+      <a routerLink="/home" class="footer-link">Home</a>
+      <a routerLink="/items" class="footer-link">Items</a>
+      <a routerLink="/post-item" class="footer-link">Post an Item</a>
+      <a routerLink="/home" class="footer-link">About</a>
+      <a routerLink="/home" class="footer-link">Contact Us</a>
+    </nav>
+
+    <div class="footer-actions">
+      <span class="footer-cta-label">Let's do it!</span>
+      <a routerLink="/register" class="btn-footer-signup">Sign Up</a>
+    </div>
+
+  </div>
+
+  <div class="footer-bottom">
+    <span>© {{ year }} LoFu. All rights reserved.</span>
+  </div>
+</footer>

@@ -1,0 +1,125 @@
+<section class="contact-page">
+  <div class="contact-inner">
+
+    <!-- Left: info -->
+    <div class="contact-info">
+      <h1 class="contact-title">Get in Touch</h1>
+      <p class="contact-subtitle">
+        Have a question, concern, or want to learn more about LoFu?
+        We'd love to hear from you.
+      </p>
+
+      <div class="contact-details">
+
+        <div class="contact-detail-item">
+          <div class="contact-detail-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+              <circle cx="12" cy="10" r="3"/>
+            </svg>
+          </div>
+          <div>
+            <p class="detail-label">Location</p>
+            <p class="detail-value">Angeles City, Pampanga, Philippines</p>
+          </div>
+        </div>
+
+        <div class="contact-detail-item">
+          <div class="contact-detail-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+              <polyline points="22,6 12,13 2,6"/>
+            </svg>
+          </div>
+          <div>
+            <p class="detail-label">Email</p>
+            <p class="detail-value">hello@lofu.app</p>
+          </div>
+        </div>
+
+        <div class="contact-detail-item">
+          <div class="contact-detail-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13.1a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
+            </svg>
+          </div>
+          <div>
+            <p class="detail-label">Phone</p>
+            <p class="detail-value">+63 XXX XXX XXXX</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Right: form -->
+    <div class="contact-form-wrap">
+      <h2 class="form-heading">Send us a message</h2>
+
+      @if (successMsg()) {
+        <div class="alert-success">{{ successMsg() }}</div>
+      }
+      @if (errorMsg()) {
+        <div class="alert-error">{{ errorMsg() }}</div>
+      }
+
+      <form (ngSubmit)="onSubmit()" #contactForm="ngForm" novalidate>
+
+        <div class="field-row">
+          <div class="field-group">
+            <label for="name">Full Name</label>
+            <input
+              id="name"
+              type="text"
+              [(ngModel)]="name"
+              name="name"
+              placeholder="John Doe"
+              [disabled]="isLoading()"
+            />
+          </div>
+          <div class="field-group">
+            <label for="email">Email</label>
+            <input
+              id="email"
+              type="email"
+              [(ngModel)]="email"
+              name="email"
+              placeholder="john@email.com"
+              [disabled]="isLoading()"
+            />
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label for="subject">Subject</label>
+          <input
+            id="subject"
+            type="text"
+            [(ngModel)]="subject"
+            name="subject"
+            placeholder="How can we help?"
+            [disabled]="isLoading()"
+          />
+        </div>
+
+        <div class="field-group">
+          <label for="message">Message</label>
+          <textarea
+            id="message"
+            [(ngModel)]="message"
+            name="message"
+            placeholder="Write your message here..."
+            rows="6"
+            [disabled]="isLoading()"
+          ></textarea>
+        </div>
+
+        <button type="submit" class="btn-primary" [disabled]="isLoading()">
+          @if (isLoading()) { Sending… } @else { Send Message }
+        </button>
+
+      </form>
+    </div>
+
+  </div>
+</section>

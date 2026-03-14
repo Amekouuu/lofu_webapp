@@ -1,50 +1,69 @@
-<!-- ═══════════════════════════════════════════
-     HERO — photo grid + tagline
-════════════════════════════════════════════ -->
 <section class="about-hero">
   <div class="about-hero-inner">
 
-    <!-- Left: tagline -->
     <div class="about-hero-text">
       <h1 class="about-hero-title">
-        LoFu helps people discover simple ways to reconnect
-        with their belongings through community trust and
-        honest collaboration.
+        Bringing it Home,<br> One Item at a Time
       </h1>
       <p class="about-hero-desc">
-        Blending local reporting with a secure verification system, our platform
-        helps neighbors make small, helpful actions that lead to successful recoveries.
+        We’re a community-powered platform helping people in Angeles City reconnect with the things they value most.
       </p>
-      <p class="about-hero-desc">
-        By combining community-driven insights and neighborly support, we've created
-        a system that empowers individuals to take control of their lost items and
-        their neighborhood's safety. Today, our mission goes beyond a simple list —
-        we're building tools that inspire honesty, kindness, and long-term community connection.
-      </p>
+      <a routerLink="/items" class="btn-learn">Learn More</a>
     </div>
 
-    <!-- Right: photo grid placeholder -->
     <div class="about-photo-grid">
-      <div class="photo-grid-inner">
-        <div class="img-block photo-block photo-tall"></div>
-        <div class="photo-col-right">
-          <div class="img-block photo-block photo-sm"></div>
-          <div class="img-block photo-block photo-sm"></div>
-        </div>
-        <div class="img-block photo-block photo-wide"></div>
-        <div class="img-block photo-block photo-wide"></div>
+      <div class="photo-stack-left">
+        <img src="/community-1.jpg" alt="Community group" class="about-img img-top">
+        <img src="/community-2.jpg" alt="Hands together" class="about-img img-bottom">
+      </div>
+      <div class="photo-stack-right">
+        <img src="/community-3.jpg" alt="People walking" class="about-img img-tall">
       </div>
     </div>
 
   </div>
 </section>
 
-<!-- ═══════════════════════════════════════════
-     OUR HISTORY
-════════════════════════════════════════════ -->
+<section class="how-it-works">
+  <div class="how-inner">
+    <h2 class="how-section-title">How does LoFu work?</h2>
+    
+    <div class="how-grid">
+      <div class="how-step">
+        <div class="how-number">1</div>
+        <h3 class="how-step-title">Snap and Share</h3>
+        <p class="how-step-desc">
+          Whether you've lost an item or found something that doesn't belong to you, 
+          posting takes less than a minute. Just upload a photo, add a location tag, 
+          and write a brief description.
+        </p>
+      </div>
+
+      <div class="how-step">
+        <div class="how-number">2</div>
+        <h3 class="how-step-title">Explore the feed.</h3>
+        <p class="how-step-desc">
+          Users can scroll through the latest "Lost" and "Found" posts in their area 
+          to see if a matching item has been reported. Our simple layout makes it 
+          easy to spot what you're looking for.
+        </p>
+      </div>
+
+      <div class="how-step">
+        <div class="how-number">3</div>
+        <h3 class="how-step-title">Send a message.</h3>
+        <p class="how-step-desc">
+          If you recognize an item, just click the "I found it!" button. This starts 
+          a private conversation where you can coordinate a safe handover and get 
+          the item back home.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section class="about-history">
   <div class="history-card">
-
     <div class="history-text">
       <h2 class="history-title">Our History</h2>
       <p class="history-desc">
@@ -54,19 +73,52 @@
         belongings with their rightful owners.
       </p>
       <p class="history-desc">
-        What started as a vision to simplify the "Lost and Found" process has
-        grown into a mission to foster honesty and kindness. We realized that
-        losing an essential item — whether it's a cherished heirloom or a daily
-        necessity — is a stressful experience. We created LoFu to turn that stress
-        into relief by providing a transparent, easy-to-use platform where
-        neighbors can look out for one another.
+        We created LoFu to turn that stress into relief by providing a transparent, 
+        easy-to-use platform where neighbors can look out for one another.
       </p>
     </div>
 
     <div class="history-image">
-      <!-- Replace with actual photo -->
-      <div class="img-block history-img-placeholder"></div>
+      <img src="/about-image.png" alt="Our story" class="history-img">
     </div>
+  </div>
+</section>
 
+<section class="mission-section">
+  <div class="mission-inner">
+    <h2 class="mission-title">Living Our mission</h2>
+    <p class="mission-subtitle">Our team is dedicated to fostering honesty and integrity within Angeles City every day.</p>
+    
+    <div class="mission-grid">
+      <div class="mission-card">
+        <span class="quote-icon">“</span>
+        <p class="mission-text">
+          Building this platform wasn't just about the code; it was about creating a safer 
+          neighborhood. I wanted to make sure that when someone loses something important, 
+          they have a reliable place to turn to
+        </p>
+        <p class="mission-author">— Shannen G. Pascual, UI/UX Designer</p>
+      </div>
+
+      <div class="mission-card">
+        <span class="quote-icon">“</span>
+        <p class="mission-text">
+          We focus on simplicity and security. By enabling direct, private communication 
+          between neighbors, we’re helping people bypass the noise of social media and get 
+          straight to the reunion
+        </p>
+        <p class="mission-author">— Julien Michael Punsalan, Full Stack Developer</p>
+      </div>
+
+      <div class="mission-card">
+        <span class="quote-icon">“</span>
+        <p class="mission-text">
+          Every time I see a post marked 'Reunited,' it reminds me why we started LoFu. 
+          It’s about more than just items—it’s about the small acts of kindness that 
+          make our community stronger
+        </p>
+        <p class="mission-author">— Micko Alberto, Front-end</p>
+      </div>
+    </div>
   </div>
 </section>

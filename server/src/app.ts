@@ -16,8 +16,10 @@ app.use(
 
 app.use(helmet());
 app.use(morgan('dev'));
-app.use(express.json({ limit: '5mb' }));
-app.use(express.urlencoded({ extended: true }));
+
+// 20mb to handle up to 4 base64 images per post before Cloudinary upload
+app.use(express.json({ limit: '20mb' }));
+app.use(express.urlencoded({ extended: true, limit: '20mb' }));
 
 app.get('/', (_req, res) => {
   res.json({

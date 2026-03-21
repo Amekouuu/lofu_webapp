@@ -16,6 +16,7 @@ export interface PostDocument extends Document {
   locationDetails?: string;
   dateLostOrFound: Date;
   incidentTimeApprox?: TimeApprox;
+  rewardOffered?: string;
   images: string[];
   status: PostStatus;
   approvedClaimId?: Types.ObjectId | null;
@@ -77,6 +78,10 @@ const postSchema = new Schema<PostDocument>(
     incidentTimeApprox: {
       type: String,
       enum: ['Morning', 'Afternoon', 'Evening', 'Night'],
+    },
+    rewardOffered: {
+      type: String,
+      trim: true,
     },
     images: {
       type: [String],

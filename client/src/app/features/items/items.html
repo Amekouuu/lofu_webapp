@@ -48,11 +48,28 @@
       </div>
     </div>
 
-    <!-- ── Loading state ── -->
     @if (isLoading()) {
-      <div class="state-wrap">
-        <div class="spinner"></div>
-        <p>Loading items...</p>
+      <div class="items-grid">
+        @for (i of [1,2,3,4,5,6]; track i) {
+          <div class="item-card skeleton-card">
+            <div class="card-image skeleton-shimmer" style="height: 200px;"></div>
+            
+            <div class="card-body">
+              <div class="card-title-row" style="margin-bottom: 1.5rem;">
+                <div class="skeleton-shimmer" style="height: 24px; width: 60%;"></div>
+                <div class="skeleton-shimmer" style="height: 20px; width: 50px; border-radius: 20px;"></div>
+              </div>
+
+              <div class="card-meta">
+                <div class="skeleton-shimmer" style="height: 14px; width: 80%; margin-bottom: 10px;"></div>
+                <div class="skeleton-shimmer" style="height: 14px; width: 90%; margin-bottom: 10px;"></div>
+                <div class="skeleton-shimmer" style="height: 14px; width: 70%;"></div>
+              </div>
+
+              <div class="skeleton-shimmer" style="height: 40px; width: 100%; margin-top: 1.5rem; border-radius: var(--radius-md);"></div>
+            </div>
+          </div>
+        }
       </div>
     }
 

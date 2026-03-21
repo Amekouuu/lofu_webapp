@@ -21,6 +21,7 @@ export interface Post {
   locationDetails?: string;
   dateLostOrFound: string;
   incidentTimeApprox?: string;
+  rewardOffered?: string;
   images: string[];
   status: PostStatus;
   approvedClaimId?: string | null;

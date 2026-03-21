@@ -1,5 +1,19 @@
 import { Request, Response } from 'express';
 import { Post } from '../models/Post';
+import { cloudinary } from '../config/cloudinary';
+
+// Helper — uploads a base64 string to Cloudinary, returns the secure URL
+async function uploadToCloudinary(base64: string, folder = 'lofu/posts'): Promise<string> {
+  const result = await cloudinary.uploader.upload(base64, {
+    folder,
+    resource_type: 'image',
+    transformation: [
+      { width: 1200, height: 1200, crop: 'limit' },
+      { quality: 'auto', fetch_format: 'auto' },
+    ],
+  });
+  return result.secure_url;
+}
 
 // GET /api/posts
 // Public — supports ?type=Lost|Found&search=&page=&limit=
@@ -79,7 +93,8 @@ export async function createPost(req: Request, res: Response): Promise<void> {
     const {
       type, itemName, category, description,
       color, brand, landmark, locationDetails,
-      dateLostOrFound, incidentTimeApprox, images,
+      dateLostOrFound, incidentTimeApprox,
+      rewardOffered, images,
     } = req.body as {
       type?: string;
       itemName?: string;
@@ -91,6 +106,7 @@ export async function createPost(req: Request, res: Response): Promise<void> {
       locationDetails?: string;
       dateLostOrFound?: string;
       incidentTimeApprox?: string;
+      rewardOffered?: string;
       images?: string[];
     };
 
@@ -107,19 +123,39 @@ export async function createPost(req: Request, res: Response): Promise<void> {
       return;
     }
 
+    // Upload each base64 image to Cloudinary, get back secure URLs
+    let imageUrls: string[] = [];
+    if (images && images.length > 0) {
+      try {
+        imageUrls = await Promise.all(
+          images.map(img => uploadToCloudinary(img))
+        );
+      } catch (uploadError) {
+        console.error('Cloudinary upload error:', uploadError);
+        res.status(500).json({
+          success: false,
+          message: 'Failed to upload images. Please try again.',
+        });
+        return;
+      }
+    }
+
     const post = await Post.create({
-      author: req.user!._id,
+      author:             req.user!._id,
       type,
-      itemName: itemName.trim(),
-      category: category.trim(),
-      description: description.trim(),
-      color: color?.trim() || '',
-      brand: brand?.trim() || '',
-      landmark: landmark.trim(),
-      locationDetails: locationDetails?.trim() || '',
-      dateLostOrFound: new Date(dateLostOrFound),
+      itemName:           itemName.trim(),
+      category:           category.trim(),
+      description:        description.trim(),
+      color:              color?.trim() || '',
+      brand:              brand?.trim() || '',
+      landmark:           landmark.trim(),
+      locationDetails:    locationDetails?.trim() || '',
+      dateLostOrFound:    new Date(dateLostOrFound),
       incidentTimeApprox: incidentTimeApprox || undefined,
-      images: images || [],
+      rewardOffered:      type === 'Lost' && rewardOffered?.trim()
+                            ? rewardOffered.trim()
+                            : undefined,
+      images:             imageUrls,
     });
 
     res.status(201).json({ success: true, message: 'Post created successfully', post });

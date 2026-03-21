@@ -55,6 +55,7 @@ export class PostItem {
   locationDetails = '';
   dateLostOrFound = '';
   incidentTimeApprox = '';
+  rewardOffered = '';
 
   // ── Step 3: Images ──
   imageFiles: File[] = [];
@@ -134,7 +135,6 @@ export class PostItem {
     this.errorMessage.set('');
     this.isLoading.set(true);
 
-    // Convert images to base64 strings for the API
     const images = [...this.imagePreviews];
 
     this.postService.createPost({
@@ -148,6 +148,9 @@ export class PostItem {
       locationDetails: this.locationDetails.trim() || undefined,
       dateLostOrFound: this.dateLostOrFound,
       incidentTimeApprox: this.incidentTimeApprox || undefined,
+      rewardOffered: this.postType === 'Lost' && this.rewardOffered.trim()
+        ? this.rewardOffered.trim()
+        : undefined,
       images,
     }).subscribe({
       next: (res) => {
@@ -172,6 +175,7 @@ export class PostItem {
     this.locationDetails = '';
     this.dateLostOrFound = '';
     this.incidentTimeApprox = '';
+    this.rewardOffered = '';
     this.imageFiles = [];
     this.imagePreviews = [];
     this.errorMessage.set('');

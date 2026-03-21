@@ -25,6 +25,49 @@
   --font-body: 'DM Sans', sans-serif;
 }
 
+/* ─── Dark Mode ─── */
+[data-theme="dark"] {
+  --primary: #7b8ff9;
+  --primary-hover: #6475f7;
+  --primary-light: #1e2147;
+  --accent: #fb923c;
+  --text-dark: #f9fafb;
+  --text-body: #d1d5db;
+  --text-muted: #9ca3af;
+  --text-light: #6b7280;
+  --border: #2d2d3f;
+  --border-focus: #7b8ff9;
+  --bg: #0f0f1a;
+  --white: #1a1a2e;
+  --error: #f87171;
+  --success: #4ade80;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.4);
+  --shadow-lg: 0 10px 40px rgba(0,0,0,0.5);
+}
+
+[data-theme="dark"] body {
+  background: var(--bg);
+  color: var(--text-body);
+}
+
+/* Fix floating labels in dark mode — background must match input bg */
+[data-theme="dark"] .field-group label {
+  background: var(--white);
+  color: var(--text-muted);
+}
+
+[data-theme="dark"] .field-group input {
+  background: var(--white);
+  color: var(--text-dark);
+  border-color: var(--border);
+}
+
+/* Fix auth visual panel */
+[data-theme="dark"] .auth-visual {
+  background: #13131f;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -37,6 +80,7 @@ html, body {
   color: var(--text-body);
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
+  transition: background 0.25s ease, color 0.25s ease;
 }
 
 a { color: inherit; text-decoration: none; }
@@ -231,6 +275,12 @@ img { max-width: 100%; display: block; }
   padding: 0.75rem 1rem;
   font-size: 0.875rem;
   margin-bottom: 1.25rem;
+}
+
+[data-theme="dark"] .alert-error {
+  background: #2d1515;
+  border-color: #7f1d1d;
+  color: #fca5a5;
 }
 
 .img-placeholder {

@@ -21,7 +21,7 @@
   align-items: center;
   text-decoration: none;
   transition: opacity 0.2s ease;
-  flex: 1
+  flex: 1;
 }
 
 .nav-logo:hover {
@@ -29,8 +29,8 @@
 }
 
 .logo-image {
-  height: 100px; /* Slightly increased for better visibility */
-  width: auto; 
+  height: 100px;
+  width: auto;
   display: block;
 }
 
@@ -70,6 +70,32 @@
   align-items: center;
   gap: 0.75rem;
   flex-shrink: 0;
+}
+
+/* Settings icon button */
+.nav-icon-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  background: none;
+  border: 1.5px solid transparent;
+  transition: color 0.15s, background 0.15s, border-color 0.15s;
+}
+
+.nav-icon-btn:hover {
+  color: var(--primary);
+  background: var(--primary-light);
+  border-color: var(--primary-light);
+}
+
+.nav-icon-btn.nav-icon-active {
+  color: var(--primary);
+  background: var(--primary-light);
+  border-color: var(--primary);
 }
 
 .nav-avatar {

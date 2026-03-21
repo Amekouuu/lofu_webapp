@@ -172,6 +172,29 @@
               </select>
             </div>
           </div>
+
+          <!-- Reward Offered — only for Lost posts -->
+          @if (postType === 'Lost') {
+            <div class="field-group reward-group">
+              <label for="rewardOffered">
+                Reward Offered
+                <span class="field-tag">Optional</span>
+              </label>
+              <div class="reward-input-wrap">
+                <span class="reward-prefix">₱</span>
+                <input
+                  id="rewardOffered"
+                  type="text"
+                  [(ngModel)]="rewardOffered"
+                  name="rewardOffered"
+                  placeholder="e.g. 500, 1000, Negotiable"
+                  class="reward-input"
+                />
+              </div>
+              <p class="field-hint">Let people know if you're offering a reward for returning the item.</p>
+            </div>
+          }
+
         </div>
       }
 
@@ -254,6 +277,12 @@
                 <div class="summary-item">
                   <span class="summary-label">Brand</span>
                   <span class="summary-value">{{ brand }}</span>
+                </div>
+              }
+              @if (postType === 'Lost' && rewardOffered) {
+                <div class="summary-item">
+                  <span class="summary-label">Reward</span>
+                  <span class="summary-value reward-summary">₱ {{ rewardOffered }}</span>
                 </div>
               }
             </div>

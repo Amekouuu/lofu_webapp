@@ -35,4 +35,8 @@ export class UserService {
   deletePost(postId: string): Observable<{ success: boolean; message: string }> {
     return this.http.delete<{ success: boolean; message: string }>(`${API_BASE_URL}/users/me/posts/${postId}`);
   }
+
+  deleteAccount(): Observable<{ success: boolean; message: string }> {
+    return this.http.delete<{ success: boolean; message: string }>(`${API_BASE_URL}/users/me`);
+  }
 }

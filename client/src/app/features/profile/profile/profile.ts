@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -7,7 +7,6 @@ import { UserService } from '../../../core/services/user.service';
 import { ClaimService } from '../../../core/services/claim.service';
 import { Post } from '../../../core/models/post.model';
 import { Claim } from '../../../core/models/claim.model';
-import { User } from '../../../core/models/user.model';
 
 type Tab = 'posts' | 'incoming' | 'myclaims' | 'edit';
 
@@ -21,6 +20,8 @@ export class Profile implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly userService = inject(UserService);
   private readonly claimService = inject(ClaimService);
+
+  @ViewChild('avatarInput') avatarInput!: ElementRef<HTMLInputElement>;
 
   readonly currentUser = this.authService.currentUser;
 
@@ -43,6 +44,10 @@ export class Profile implements OnInit {
   editLoading = signal(false);
   editSuccess = signal('');
   editError = signal('');
+
+  // Avatar upload
+  avatarLoading = signal(false);
+  avatarError = signal('');
 
   // Change password form
   currentPassword = '';
@@ -75,8 +80,59 @@ export class Profile implements OnInit {
     this.activeTab.set(tab);
     this.editSuccess.set('');
     this.editError.set('');
+    this.avatarError.set('');
     this.passwordSuccess.set('');
     this.passwordError.set('');
+  }
+
+  // ── Avatar Upload ─────────────────────────────
+  triggerAvatarInput() {
+    this.avatarInput.nativeElement.click();
+  }
+
+  onAvatarFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    // Validate type
+    if (!file.type.startsWith('image/')) {
+      this.avatarError.set('Please select an image file.');
+      return;
+    }
+
+    // Validate size (max 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      this.avatarError.set('Image must be under 2MB.');
+      return;
+    }
+
+    this.avatarError.set('');
+    this.avatarLoading.set(true);
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const base64 = reader.result as string;
+
+      this.userService.updateProfile({ avatar: base64 }).subscribe({
+        next: (res) => {
+          (this.authService as any).currentUserSignal?.set(res.user);
+          this.avatarLoading.set(false);
+        },
+        error: () => {
+          this.avatarError.set('Failed to update avatar. Please try again.');
+          this.avatarLoading.set(false);
+        },
+      });
+    };
+    reader.onerror = () => {
+      this.avatarError.set('Could not read the file.');
+      this.avatarLoading.set(false);
+    };
+    reader.readAsDataURL(file);
+
+    // Reset input so the same file can be re-selected
+    input.value = '';
   }
 
   // ── My Posts ──────────────────────────────────
@@ -118,9 +174,12 @@ export class Profile implements OnInit {
     this.claimService.approveClaim(claimId).subscribe({
       next: () => {
         this.incomingClaims.update(claims =>
-          claims.map(c => c._id === claimId ? { ...c, status: 'Approved' as const } : { ...c, status: c.status === 'Pending' ? 'Rejected' as const : c.status })
+          claims.map(c => c._id === claimId
+            ? { ...c, status: 'Approved' as const }
+            : { ...c, status: c.status === 'Pending' ? 'Rejected' as const : c.status }
+          )
         );
-        this.loadMyPosts(); // refresh post statuses
+        this.loadMyPosts();
       },
     });
   }
@@ -158,10 +217,9 @@ export class Profile implements OnInit {
     this.userService.updateProfile({
       fullName: this.editFullName.trim(),
       username: this.editUsername.trim(),
-      email: this.editEmail.trim(),
+      email:    this.editEmail.trim(),
     }).subscribe({
       next: (res) => {
-        // Update auth service signal with new user data
         (this.authService as any).currentUserSignal?.set(res.user);
         this.editSuccess.set('Profile updated successfully!');
         this.editLoading.set(false);
@@ -195,13 +253,13 @@ export class Profile implements OnInit {
     this.passwordLoading.set(true);
     this.userService.changePassword({
       currentPassword: this.currentPassword,
-      newPassword: this.newPassword,
+      newPassword:     this.newPassword,
     }).subscribe({
       next: () => {
         this.passwordSuccess.set('Password changed successfully!');
-        this.currentPassword = '';
-        this.newPassword = '';
-        this.confirmNewPassword = '';
+        this.currentPassword      = '';
+        this.newPassword          = '';
+        this.confirmNewPassword   = '';
         this.passwordLoading.set(false);
       },
       error: (err) => {

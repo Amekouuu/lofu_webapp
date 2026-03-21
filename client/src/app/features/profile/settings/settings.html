@@ -1,1 +1,208 @@
-<p>settings works!</p>
+<div class="settings-page">
+  <div class="settings-inner">
+
+    <div class="settings-header">
+      <h1 class="settings-title">Settings</h1>
+      <p class="settings-subtitle">Manage your account preferences</p>
+    </div>
+
+    <!-- ── Theme ── -->
+    <div class="settings-card">
+      <div class="card-header">
+        <div class="card-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"/>
+            <line x1="12" y1="1" x2="12" y2="3"/>
+            <line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/>
+            <line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+          </svg>
+        </div>
+        <div>
+          <h2 class="card-title">Appearance</h2>
+          <p class="card-desc">Choose how LoFu looks for you</p>
+        </div>
+      </div>
+
+      <div class="theme-options">
+        <button
+          class="theme-btn"
+          [class.active]="currentTheme() === 'light'"
+          (click)="setTheme('light')"
+        >
+          <div class="theme-preview theme-preview-light">
+            <div class="preview-nav"></div>
+            <div class="preview-card"></div>
+            <div class="preview-card short"></div>
+          </div>
+          <span class="theme-label">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="5"/>
+              <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+              <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+            </svg>
+            Light
+          </span>
+          @if (currentTheme() === 'light') {
+            <span class="theme-active-dot"></span>
+          }
+        </button>
+
+        <button
+          class="theme-btn"
+          [class.active]="currentTheme() === 'dark'"
+          (click)="setTheme('dark')"
+        >
+          <div class="theme-preview theme-preview-dark">
+            <div class="preview-nav"></div>
+            <div class="preview-card"></div>
+            <div class="preview-card short"></div>
+          </div>
+          <span class="theme-label">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+            </svg>
+            Dark
+          </span>
+          @if (currentTheme() === 'dark') {
+            <span class="theme-active-dot"></span>
+          }
+        </button>
+      </div>
+    </div>
+
+    <!-- ── Privacy ── -->
+    <div class="settings-card">
+      <div class="card-header">
+        <div class="card-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+        </div>
+        <div>
+          <h2 class="card-title">Privacy</h2>
+          <p class="card-desc">Control what others can see</p>
+        </div>
+      </div>
+
+      @if (privacySuccess()) {
+        <div class="alert-success">{{ privacySuccess() }}</div>
+      }
+      @if (privacyError()) {
+        <div class="alert-error">{{ privacyError() }}</div>
+      }
+
+      <div class="toggle-list">
+
+        <div class="toggle-row">
+          <div class="toggle-info">
+            <p class="toggle-label">Public Profile</p>
+            <p class="toggle-desc">Allow other users to see your profile and posts</p>
+          </div>
+          <button
+            class="toggle-switch"
+            [class.on]="profileVisible()"
+            (click)="profileVisible.set(!profileVisible())"
+            [attr.aria-checked]="profileVisible()"
+            role="switch"
+          >
+            <span class="toggle-thumb"></span>
+          </button>
+        </div>
+
+        <div class="toggle-divider"></div>
+
+        <div class="toggle-row">
+          <div class="toggle-info">
+            <p class="toggle-label">Show Email on Profile</p>
+            <p class="toggle-desc">Display your email address to other users</p>
+          </div>
+          <button
+            class="toggle-switch"
+            [class.on]="showEmail()"
+            (click)="showEmail.set(!showEmail())"
+            [attr.aria-checked]="showEmail()"
+            role="switch"
+          >
+            <span class="toggle-thumb"></span>
+          </button>
+        </div>
+
+      </div>
+
+      <button class="btn-save-settings" (click)="savePrivacy()" [disabled]="privacySaving()">
+        @if (privacySaving()) { Saving… } @else { Save Preferences }
+      </button>
+    </div>
+
+    <!-- ── Delete Account ── -->
+    <div class="settings-card danger-card">
+      <div class="card-header">
+        <div class="card-icon danger-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="3 6 5 6 21 6"/>
+            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+            <path d="M10 11v6"/><path d="M14 11v6"/>
+            <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+          </svg>
+        </div>
+        <div>
+          <h2 class="card-title danger-title">Danger Zone</h2>
+          <p class="card-desc">Irreversible actions for your account</p>
+        </div>
+      </div>
+
+      <div class="danger-row">
+        <div>
+          <p class="danger-label">Delete Account</p>
+          <p class="danger-desc">Permanently delete your account and all your posts. This cannot be undone.</p>
+        </div>
+        <button class="btn-delete-account" (click)="openDeleteModal()">Delete Account</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── Delete Confirm Modal ── -->
+@if (showDeleteModal()) {
+  <div class="modal-backdrop" (click)="closeDeleteModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+          <line x1="12" y1="9" x2="12" y2="13"/>
+          <line x1="12" y1="17" x2="12.01" y2="17"/>
+        </svg>
+      </div>
+      <h3 class="modal-title">Delete your account?</h3>
+      <p class="modal-body">
+        This will permanently delete your account, all your posts, and all your claims.
+        <strong>This action cannot be undone.</strong>
+      </p>
+      <p class="modal-body">Type <strong>delete my account</strong> to confirm:</p>
+      <input
+        type="text"
+        class="modal-input"
+        [(ngModel)]="deleteConfirmText"
+        placeholder="delete my account"
+        [disabled]="deleteLoading()"
+      />
+      @if (deleteError()) {
+        <div class="alert-error">{{ deleteError() }}</div>
+      }
+      <div class="modal-actions">
+        <button class="btn-modal-cancel" (click)="closeDeleteModal()" [disabled]="deleteLoading()">Cancel</button>
+        <button class="btn-modal-delete" (click)="confirmDelete()" [disabled]="deleteLoading()">
+          @if (deleteLoading()) { Deleting… } @else { Yes, Delete }
+        </button>
+      </div>
+    </div>
+  </div>
+}

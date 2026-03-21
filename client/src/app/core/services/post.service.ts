@@ -22,6 +22,7 @@ export interface CreatePostPayload {
   locationDetails?: string;
   dateLostOrFound: string;
   incidentTimeApprox?: string;
+  rewardOffered?: string;
   images?: string[];
 }
 

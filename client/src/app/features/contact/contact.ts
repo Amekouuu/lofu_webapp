@@ -3,10 +3,9 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 // ─── EmailJS config ───────────────────────────────────────────────
-// Replace these with your actual EmailJS values from emailjs.com
-const EMAILJS_SERVICE_ID  = 'YOUR_SERVICE_ID';
-const EMAILJS_TEMPLATE_ID = 'YOUR_TEMPLATE_ID';
-const EMAILJS_PUBLIC_KEY  = 'YOUR_PUBLIC_KEY';
+const EMAILJS_SERVICE_ID  = 'service_h64pn57';
+const EMAILJS_TEMPLATE_ID = 'template_gdfdmqa';
+const EMAILJS_PUBLIC_KEY  = 'fdKiUJiJkms7lnJ1D';
 // ─────────────────────────────────────────────────────────────────
 
 declare const emailjs: {
@@ -30,7 +29,7 @@ export class Contact {
   subject  = '';
   message  = '';
 
-  isLoading = signal(false);
+  isLoading  = signal(false);
   successMsg = signal('');
   errorMsg   = signal('');
 
@@ -50,17 +49,17 @@ export class Contact {
         EMAILJS_SERVICE_ID,
         EMAILJS_TEMPLATE_ID,
         {
-          from_name: this.name.trim(),
+          from_name:  this.name.trim(),
           from_email: this.email.trim(),
-          subject: this.subject.trim(),
-          message: this.message.trim(),
+          subject:    this.subject.trim(),
+          message:    this.message.trim(),
         },
         EMAILJS_PUBLIC_KEY
       );
 
-      this.successMsg.set('Your message was sent! We\'ll get back to you shortly.');
-      this.name = '';
-      this.email = '';
+      this.successMsg.set("Your message was sent! We'll get back to you shortly.");
+      this.name    = '';
+      this.email   = '';
       this.subject = '';
       this.message = '';
     } catch {

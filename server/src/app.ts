@@ -7,9 +7,22 @@ import apiRoutes from './routes';
 
 const app = express();
 
+const allowedOrigins = [
+  env.clientUrl,
+  'http://localhost:4200',
+  'http://localhost:3000',
+];
+
 app.use(
   cors({
-    origin: env.clientUrl,
+    origin: (origin, callback) => {
+      // Allow requests with no origin (mobile apps, curl, Postman)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      return callback(new Error(`CORS blocked: ${origin}`));
+    },
     credentials: true,
   })
 );

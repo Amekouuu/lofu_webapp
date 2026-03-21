@@ -18,31 +18,24 @@ export class Settings implements OnInit {
 
   readonly currentUser = this.authService.currentUser;
 
-  // ── Theme ─────────────────────────────────────
   currentTheme = signal<'light' | 'dark'>('light');
-
-  // ── Privacy ───────────────────────────────────
   profileVisible = signal(true);
   showEmail      = signal(false);
   privacySaving  = signal(false);
   privacySuccess = signal('');
   privacyError   = signal('');
-
-  // ── Delete Account ────────────────────────────
   deleteConfirmText = '';
   deleteLoading     = signal(false);
   deleteError       = signal('');
   showDeleteModal   = signal(false);
 
   ngOnInit() {
-    // Restore saved theme
     const saved = localStorage.getItem('lofu-theme') as 'light' | 'dark' | null;
     if (saved) {
       this.currentTheme.set(saved);
       document.documentElement.setAttribute('data-theme', saved);
     }
 
-    // Restore saved privacy prefs
     const privacyRaw = localStorage.getItem('lofu-privacy');
     if (privacyRaw) {
       try {
@@ -53,33 +46,35 @@ export class Settings implements OnInit {
     }
   }
 
-  // ── Theme ─────────────────────────────────────
   setTheme(theme: 'light' | 'dark') {
     this.currentTheme.set(theme);
     document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem('lofu-theme', theme);
   }
 
-  // ── Privacy ───────────────────────────────────
   savePrivacy() {
     this.privacySuccess.set('');
     this.privacyError.set('');
     this.privacySaving.set(true);
 
-    // Persist locally (extend to backend later if needed)
-    const prefs = {
+    const payload = {
       profileVisible: this.profileVisible(),
       showEmail:      this.showEmail(),
     };
-    localStorage.setItem('lofu-privacy', JSON.stringify(prefs));
 
-    setTimeout(() => {
-      this.privacySuccess.set('Privacy preferences saved.');
-      this.privacySaving.set(false);
-    }, 600);
+    this.userService.updatePrivacy(payload).subscribe({
+      next: () => {
+        localStorage.setItem('lofu-privacy', JSON.stringify(payload));
+        this.privacySuccess.set('Privacy preferences saved.');
+        this.privacySaving.set(false);
+      },
+      error: () => {
+        this.privacyError.set('Failed to save preferences. Please try again.');
+        this.privacySaving.set(false);
+      },
+    });
   }
 
-  // ── Delete Account ────────────────────────────
   openDeleteModal() {
     this.deleteConfirmText = '';
     this.deleteError.set('');
@@ -101,7 +96,6 @@ export class Settings implements OnInit {
     this.deleteLoading.set(true);
     this.deleteError.set('');
 
-    // Call backend delete endpoint
     this.userService.deleteAccount().subscribe({
       next: () => {
         this.authService.logout();

@@ -16,6 +16,11 @@ export interface ChangePasswordPayload {
   newPassword: string;
 }
 
+export interface UpdatePrivacyPayload {
+  profileVisible: boolean;
+  showEmail: boolean;
+}
+
 @Injectable({ providedIn: 'root' })
 export class UserService {
   private readonly http = inject(HttpClient);
@@ -26,6 +31,10 @@ export class UserService {
 
   updateProfile(payload: UpdateProfilePayload): Observable<{ success: boolean; message: string; user: any }> {
     return this.http.patch<{ success: boolean; message: string; user: any }>(`${API_BASE_URL}/users/me`, payload);
+  }
+
+  updatePrivacy(payload: UpdatePrivacyPayload): Observable<{ success: boolean; message: string }> {
+    return this.http.patch<{ success: boolean; message: string }>(`${API_BASE_URL}/users/me/privacy`, payload);
   }
 
   changePassword(payload: ChangePasswordPayload): Observable<{ success: boolean; message: string }> {

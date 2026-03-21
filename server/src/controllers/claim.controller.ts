@@ -1,6 +1,8 @@
 import { Request, Response } from 'express';
 import { Claim } from '../models/Claim';
 import { Post } from '../models/Post';
+import { Conversation } from '../models/Conversation';
+import { Message } from '../models/Message';
 
 // POST /api/claims — submit a claim on a post
 export async function createClaim(req: Request, res: Response): Promise<void> {
@@ -33,7 +35,6 @@ export async function createClaim(req: Request, res: Response): Promise<void> {
       return;
     }
 
-    // Prevent duplicate claims
     const existing = await Claim.findOne({ post: postId, claimant: req.user!._id });
     if (existing) {
       res.status(409).json({ success: false, message: 'You have already submitted a claim for this item' });
@@ -48,7 +49,6 @@ export async function createClaim(req: Request, res: Response): Promise<void> {
       contactInfo: contactInfo?.trim() || '',
     });
 
-    // Update post status to Claim Pending
     await Post.findByIdAndUpdate(postId, { status: 'Claim Pending' });
 
     res.status(201).json({ success: true, message: 'Claim submitted successfully', claim });
@@ -61,7 +61,6 @@ export async function createClaim(req: Request, res: Response): Promise<void> {
 // GET /api/claims/incoming — claims on the current user's posts
 export async function getIncomingClaims(req: Request, res: Response): Promise<void> {
   try {
-    // Find all posts owned by this user
     const myPosts = await Post.find({ author: req.user!._id }).select('_id');
     const postIds = myPosts.map(p => p._id);
 
@@ -100,13 +99,13 @@ export async function approveClaim(req: Request, res: Response): Promise<void> {
       return;
     }
 
-    const post = await Post.findById(claim.post);
+    const post = await Post.findById(claim.post).populate('author', 'fullName');
     if (!post) {
       res.status(404).json({ success: false, message: 'Post not found' });
       return;
     }
 
-    if (String(post.author) !== String(req.user!._id)) {
+    if (String(post.author._id || post.author) !== String(req.user!._id)) {
       res.status(403).json({ success: false, message: 'Only the post owner can approve claims' });
       return;
     }
@@ -125,6 +124,38 @@ export async function approveClaim(req: Request, res: Response): Promise<void> {
     post.status = 'Resolved';
     post.approvedClaimId = claim._id as typeof post.approvedClaimId;
     await post.save();
+
+    // Create conversation if it doesn't exist yet
+    const existingConvo = await Conversation.findOne({
+      post: post._id,
+      participants: { $all: [post.author._id || post.author, claim.claimant] },
+    });
+
+    let conversation = existingConvo;
+
+    if (!existingConvo) {
+      conversation = await Conversation.create({
+        participants: [post.author._id || post.author, claim.claimant],
+        post: post._id,
+        claim: claim._id,
+      });
+    }
+
+    // Auto-generate opening message from the system
+    if (conversation) {
+      const autoText = `🎉 Claim approved! "${post.itemName}" has been matched. Please coordinate here to arrange the return. Good luck! 🤝`;
+
+      await Message.create({
+        conversation: conversation._id,
+        sender: post.author._id || post.author,
+        content: autoText,
+      });
+
+      await Conversation.findByIdAndUpdate(conversation._id, {
+        lastMessage: autoText,
+        lastMessageAt: new Date(),
+      });
+    }
 
     res.status(200).json({ success: true, message: 'Claim approved and post marked as resolved' });
   } catch (error) {
@@ -156,7 +187,6 @@ export async function rejectClaim(req: Request, res: Response): Promise<void> {
     claim.status = 'Rejected';
     await claim.save();
 
-    // If no more pending claims, revert post to Active
     const pendingCount = await Claim.countDocuments({ post: post._id, status: 'Pending' });
     if (pendingCount === 0 && post.status === 'Claim Pending') {
       await Post.findByIdAndUpdate(post._id, { status: 'Active' });

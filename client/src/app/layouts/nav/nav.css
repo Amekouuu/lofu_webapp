@@ -24,9 +24,7 @@
   flex: 1;
 }
 
-.nav-logo:hover {
-  opacity: 0.85;
-}
+.nav-logo:hover { opacity: 0.85; }
 
 .logo-image {
   height: 100px;
@@ -72,8 +70,9 @@
   flex-shrink: 0;
 }
 
-/* Settings icon button */
+/* Icon buttons (settings, chat) */
 .nav-icon-btn {
+  position: relative;
   width: 34px;
   height: 34px;
   border-radius: 50%;
@@ -96,6 +95,24 @@
   color: var(--primary);
   background: var(--primary-light);
   border-color: var(--primary);
+}
+
+/* Badge on chat icon */
+.nav-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: var(--primary);
+  color: #ffffff;
+  font-size: 0.6rem;
+  font-weight: 700;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--white);
 }
 
 .nav-avatar {
@@ -160,9 +177,7 @@
   transition: background 0.15s;
 }
 
-.btn-nav-filled:hover {
-  background: var(--primary-hover);
-}
+.btn-nav-filled:hover { background: var(--primary-hover); }
 
 /* Hamburger */
 .nav-hamburger {
@@ -195,9 +210,7 @@
   border-bottom: 1px solid var(--border);
 }
 
-.nav-mobile-link:last-child {
-  border-bottom: none;
-}
+.nav-mobile-link:last-child { border-bottom: none; }
 
 .nav-mobile-divider {
   height: 1px;
@@ -205,22 +218,11 @@
   margin: 0.5rem 0;
 }
 
-.nav-mobile-logout {
-  color: var(--error);
-}
-
-.nav-mobile-signup {
-  color: var(--primary);
-  font-weight: 600;
-}
+.nav-mobile-logout { color: var(--error); }
+.nav-mobile-signup { color: var(--primary); font-weight: 600; }
 
 @media (max-width: 768px) {
   .nav-links,
-  .nav-actions {
-    display: none;
-  }
-
-  .nav-hamburger {
-    display: flex;
-  }
+  .nav-actions { display: none; }
+  .nav-hamburger { display: flex; }
 }

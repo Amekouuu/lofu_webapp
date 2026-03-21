@@ -4,7 +4,6 @@ import { authGuard } from './core/guards/auth.guard';
 export const routes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full' },
 
-  // Auth pages (no shell)
   {
     path: 'login',
     loadComponent: () =>
@@ -16,7 +15,6 @@ export const routes: Routes = [
       import('./features/auth/register/register').then((m) => m.Register),
   },
 
-  // Main app pages (wrapped in nav + footer shell)
   {
     path: '',
     loadComponent: () =>
@@ -37,13 +35,11 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/contact/contact').then((m) => m.Contact),
       },
-      // Combined items page
       {
         path: 'items',
         loadComponent: () =>
           import('./features/items/items').then((m) => m.Items),
       },
-      // Legacy redirects — keep old URLs working
       { path: 'lost',  redirectTo: 'items', pathMatch: 'full' },
       { path: 'found', redirectTo: 'items', pathMatch: 'full' },
       {
@@ -68,6 +64,17 @@ export const routes: Routes = [
         canActivate: [authGuard],
         loadComponent: () =>
           import('./features/profile/settings/settings').then((m) => m.Settings),
+      },
+      {
+        path: 'messages',
+        canActivate: [authGuard],
+        loadComponent: () =>
+          import('./features/messages/messages').then((m) => m.Messages),
+      },
+      {
+        path: 'user/:id',
+        loadComponent: () =>
+          import('./features/public-profile/public-profile').then((m) => m.PublicProfile),
       },
     ],
   },

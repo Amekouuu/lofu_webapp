@@ -7,6 +7,10 @@ export interface UserDocument extends Document {
   passwordHash: string;
   avatar?: string;
   role: 'user' | 'admin';
+  privacySettings: {
+    profileVisible: boolean;
+    showEmail: boolean;
+  };
   createdAt: Date;
   updatedAt: Date;
 }
@@ -48,6 +52,10 @@ const userSchema = new Schema<UserDocument>(
       type: String,
       enum: ['user', 'admin'],
       default: 'user',
+    },
+    privacySettings: {
+      profileVisible: { type: Boolean, default: true },
+      showEmail:      { type: Boolean, default: false },
     },
   },
   {

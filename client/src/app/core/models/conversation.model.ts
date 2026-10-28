@@ -15,7 +15,7 @@ export interface ConversationPost {
 export interface Conversation {
   _id: string;
   participants: ConversationParticipant[];
-  post: ConversationPost;
+  post: ConversationPost | null; // null once the post has been deleted
   claim: string;
   lastMessage?: string;
   lastMessageAt?: string;

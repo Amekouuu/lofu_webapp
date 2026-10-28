@@ -1,52 +1,106 @@
 import { Request, Response } from 'express';
-import { Types } from 'mongoose';
-import { Conversation } from '../models/Conversation';
-import { Message } from '../models/Message';
+import { supabase } from '../config/supabase';
+import { createMessage, isConversationParticipant } from '../db/chat';
+import {
+  ConversationRow,
+  MESSAGE_SELECT,
+  MessageRow,
+  USER_SUMMARY_COLUMNS,
+  toConversation,
+  toMessage,
+} from '../db/mappers';
+import { isUuid } from '../db/utils';
+
+const CONVERSATION_SELECT = [
+  'id, post_id, claim_id, last_message, last_message_at, created_at, updated_at',
+  'post:posts!post_id(id, item_name, type, images)',
+  `participants:conversation_participants(user:users!user_id(${USER_SUMMARY_COLUMNS}))`,
+].join(', ');
 
 // GET /api/conversations — get all conversations for current user
 export async function getConversations(req: Request, res: Response): Promise<void> {
   try {
-    const conversations = await Conversation.find({
-      participants: req.user!._id,
-    })
-      .populate('participants', 'fullName username avatar')
-      .populate('post', 'itemName type images')
-      .sort({ lastMessageAt: -1, createdAt: -1 });
+    const { data: mine, error: mineError } = await supabase
+      .from('conversation_participants')
+      .select('conversation_id')
+      .eq('user_id', req.user!._id);
+    if (mineError) throw mineError;
 
-    res.status(200).json({ success: true, conversations });
+    const ids = (mine ?? []).map((row) => row.conversation_id as string);
+
+    if (ids.length === 0) {
+      res.status(200).json({ success: true, conversations: [] });
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from('conversations')
+      .select(CONVERSATION_SELECT)
+      .in('id', ids)
+      .order('last_message_at', { ascending: false, nullsFirst: false })
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+
+    res.status(200).json({
+      success: true,
+      conversations: ((data ?? []) as unknown as ConversationRow[]).map(toConversation),
+    });
   } catch (error) {
     console.error('Get conversations error:', error);
     res.status(500).json({ success: false, message: 'Failed to fetch conversations' });
   }
 }
 
+// Checks the conversation exists and the caller is in it. Sends 404/403 and returns
+// false otherwise.
+async function authorizeConversation(
+  conversationId: unknown,
+  userId: string,
+  res: Response
+): Promise<boolean> {
+  if (!isUuid(conversationId)) {
+    res.status(404).json({ success: false, message: 'Conversation not found' });
+    return false;
+  }
+
+  const { data, error } = await supabase
+    .from('conversations')
+    .select('id')
+    .eq('id', conversationId)
+    .maybeSingle();
+  if (error) throw error;
+
+  if (!data) {
+    res.status(404).json({ success: false, message: 'Conversation not found' });
+    return false;
+  }
+
+  if (!(await isConversationParticipant(conversationId, userId))) {
+    res.status(403).json({ success: false, message: 'Access denied' });
+    return false;
+  }
+
+  return true;
+}
+
 // GET /api/conversations/:id/messages — get messages in a conversation
 export async function getMessages(req: Request, res: Response): Promise<void> {
   try {
     const id = String(req.params['id']);
-    const conversationId = new Types.ObjectId(id);
 
-    const conversation = await Conversation.findById(conversationId);
+    if (!(await authorizeConversation(id, req.user!._id, res))) return;
 
-    if (!conversation) {
-      res.status(404).json({ success: false, message: 'Conversation not found' });
-      return;
-    }
+    const { data, error } = await supabase
+      .from('messages')
+      .select(MESSAGE_SELECT)
+      .eq('conversation_id', id)
+      .order('created_at', { ascending: true });
+    if (error) throw error;
 
-    const isParticipant = conversation.participants
-      .map((p) => String(p))
-      .includes(String(req.user!._id));
-
-    if (!isParticipant) {
-      res.status(403).json({ success: false, message: 'Access denied' });
-      return;
-    }
-
-    const messages = await Message.find({ conversation: conversationId })
-      .populate('sender', 'fullName username avatar')
-      .sort({ createdAt: 1 });
-
-    res.status(200).json({ success: true, messages });
+    res.status(200).json({
+      success: true,
+      messages: ((data ?? []) as unknown as MessageRow[]).map(toMessage),
+    });
   } catch (error) {
     console.error('Get messages error:', error);
     res.status(500).json({ success: false, message: 'Failed to fetch messages' });
@@ -58,43 +112,17 @@ export async function sendMessage(req: Request, res: Response): Promise<void> {
   try {
     const { content } = req.body as { content?: string };
     const id = String(req.params['id']);
-    const conversationId = new Types.ObjectId(id);
 
     if (!content?.trim()) {
       res.status(400).json({ success: false, message: 'Message content is required' });
       return;
     }
 
-    const conversation = await Conversation.findById(conversationId);
-    if (!conversation) {
-      res.status(404).json({ success: false, message: 'Conversation not found' });
-      return;
-    }
+    if (!(await authorizeConversation(id, req.user!._id, res))) return;
 
-    const isParticipant = conversation.participants
-      .map((p) => String(p))
-      .includes(String(req.user!._id));
+    const message = await createMessage(id, req.user!._id, content.trim());
 
-    if (!isParticipant) {
-      res.status(403).json({ success: false, message: 'Access denied' });
-      return;
-    }
-
-    const created = await Message.create({
-      conversation: conversationId,
-      sender: req.user!._id,
-      content: content.trim(),
-    });
-
-    await Conversation.findByIdAndUpdate(conversationId, {
-      lastMessage: content.trim(),
-      lastMessageAt: new Date(),
-    });
-
-    const populated = await Message.findById(created._id)
-      .populate('sender', 'fullName username avatar');
-
-    res.status(201).json({ success: true, message: populated });
+    res.status(201).json({ success: true, message });
   } catch (error) {
     console.error('Send message error:', error);
     res.status(500).json({ success: false, message: 'Failed to send message' });

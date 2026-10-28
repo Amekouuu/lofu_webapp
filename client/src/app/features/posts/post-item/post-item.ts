@@ -59,7 +59,9 @@ export class PostItem {
 
   // ── Step 3: Images ──
   imageFiles: File[] = [];
-  imagePreviews: string[] = [];
+  // A signal, because this app is zoneless: FileReader.onload runs outside any template
+  // event, so only a signal change makes Angular re-render the preview.
+  imagePreviews = signal<string[]>([]);
 
   // Step labels
   readonly steps = [
@@ -118,7 +120,7 @@ export class PostItem {
       this.imageFiles.push(file);
       const reader = new FileReader();
       reader.onload = (e) => {
-        this.imagePreviews.push(e.target?.result as string);
+        this.imagePreviews.update(previews => [...previews, e.target?.result as string]);
       };
       reader.readAsDataURL(file);
     });
@@ -127,7 +129,7 @@ export class PostItem {
 
   removeImage(index: number) {
     this.imageFiles.splice(index, 1);
-    this.imagePreviews.splice(index, 1);
+    this.imagePreviews.update(previews => previews.filter((_, i) => i !== index));
   }
 
   // ── Submit ──
@@ -135,7 +137,7 @@ export class PostItem {
     this.errorMessage.set('');
     this.isLoading.set(true);
 
-    const images = [...this.imagePreviews];
+    const images = [...this.imagePreviews()];
 
     this.postService.createPost({
       type: this.postType,
@@ -177,7 +179,7 @@ export class PostItem {
     this.incidentTimeApprox = '';
     this.rewardOffered = '';
     this.imageFiles = [];
-    this.imagePreviews = [];
+    this.imagePreviews.set([]);
     this.errorMessage.set('');
   }
 

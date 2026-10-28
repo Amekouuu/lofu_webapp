@@ -4,6 +4,7 @@ node_modules/
 # Environment files — NEVER push these
 server/.env
 client/.env
+.claude/
 
 # Build outputs
 dist/

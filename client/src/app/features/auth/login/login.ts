@@ -1,7 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
@@ -13,6 +13,7 @@ import { AuthService } from '../../../core/services/auth.service';
 export class Login {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   emailOrUsername = '';
   password = '';
@@ -20,6 +21,13 @@ export class Login {
   showPassword = signal(false);
   isLoading = signal(false);
   errorMessage = signal('');
+
+  constructor() {
+    // The auth interceptor sends people here with ?expired=1 when their session ran out.
+    if (this.route.snapshot.queryParamMap.get('expired')) {
+      this.errorMessage.set('Your session has expired. Please log in again.');
+    }
+  }
 
   togglePassword() {
     this.showPassword.update(v => !v);

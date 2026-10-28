@@ -240,8 +240,13 @@ export class Profile implements OnInit {
       return;
     }
 
-    if (this.newPassword.length < 6) {
-      this.passwordError.set('New password must be at least 6 characters.');
+    if (this.newPassword.length < 8) {
+      this.passwordError.set('New password must be at least 8 characters.');
+      return;
+    }
+
+    if (this.newPassword.length > 72) {
+      this.passwordError.set('New password must be at most 72 characters.');
       return;
     }
 

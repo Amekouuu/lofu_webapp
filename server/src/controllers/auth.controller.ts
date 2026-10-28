@@ -3,18 +3,21 @@ import bcrypt from 'bcryptjs';
 import { supabase } from '../config/supabase';
 import { signToken } from '../utils/jwt';
 import { AppUser, USER_COLUMNS, UserRow, toUser } from '../db/mappers';
-import { isUniqueViolation } from '../db/utils';
+import { isUniqueViolation, likeLiteral } from '../db/utils';
 
 type UserWithHash = UserRow & { password_hash: string };
 
 function sanitizeUser(user: AppUser) {
   return {
+    // Both spellings: the client's User type (and the chat code) reads _id, other code reads id.
+    _id: user._id,
     id: user._id,
     fullName: user.fullName,
     username: user.username,
     email: user.email,
     avatar: user.avatar || '',
     role: user.role,
+    privacySettings: user.privacySettings,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
   };
@@ -82,7 +85,7 @@ export async function register(req: Request, res: Response): Promise<void> {
     const { data: existingUsername, error: usernameError } = await supabase
       .from('users')
       .select('id')
-      .eq('username', usernameValue)
+      .ilike('username', likeLiteral(usernameValue))
       .maybeSingle();
     if (usernameError) throw usernameError;
     if (existingUsername) {
@@ -151,7 +154,7 @@ async function findUserForLogin(value: string): Promise<UserWithHash | null> {
   const byUsername = await supabase
     .from('users')
     .select(columns)
-    .eq('username', value)
+    .ilike('username', likeLiteral(value))
     .maybeSingle();
   if (byUsername.error) throw byUsername.error;
 

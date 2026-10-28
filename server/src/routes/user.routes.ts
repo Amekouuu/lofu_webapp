@@ -17,7 +17,7 @@ const router = Router();
 
 router.get('/me/posts',             requireAuth, getMyPosts);
 router.get('/:id',                              getPublicProfile);
-router.patch('/me',                 requireAuth, validateBody(updateProfileSchema), updateProfile);
+router.patch('/me',                 requireAuth, passwordLimiter, validateBody(updateProfileSchema), updateProfile);
 router.patch('/me/privacy',         requireAuth, validateBody(privacySchema), updatePrivacy);
 router.patch('/me/password',        requireAuth, passwordLimiter, validateBody(changePasswordSchema), changePassword);
 router.delete('/me/posts/:postId',  requireAuth, deleteMyPost);

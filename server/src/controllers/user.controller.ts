@@ -1,9 +1,9 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import { supabase } from '../config/supabase';
-import { isInvalidImageError, uploadImage } from '../config/cloudinary';
+import { deleteImages, isInvalidImageError, uploadImage } from '../config/cloudinary';
 import { PostRow, USER_COLUMNS, UserRow, toPost, toUser } from '../db/mappers';
-import { isUniqueViolation, isUuid } from '../db/utils';
+import { isUniqueViolation, isUuid, likeLiteral } from '../db/utils';
 
 // GET /api/users/me/posts
 export async function getMyPosts(req: Request, res: Response): Promise<void> {
@@ -106,6 +106,7 @@ function profileResponse(user: ReturnType<typeof toUser>) {
     email: user.email,
     avatar: user.avatar,
     role: user.role,
+    privacySettings: user.privacySettings,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
   };
@@ -114,11 +115,12 @@ function profileResponse(user: ReturnType<typeof toUser>) {
 // PATCH /api/users/me
 export async function updateProfile(req: Request, res: Response): Promise<void> {
   try {
-    const { fullName, username, email, avatar } = req.body as {
+    const { fullName, username, email, avatar, currentPassword } = req.body as {
       fullName?: string;
       username?: string;
       email?: string;
       avatar?: string;
+      currentPassword?: string;
     };
 
     const userId = req.user!._id;
@@ -129,7 +131,7 @@ export async function updateProfile(req: Request, res: Response): Promise<void> 
       const { data: taken, error } = await supabase
         .from('users')
         .select('id')
-        .eq('username', usernameValue)
+        .ilike('username', likeLiteral(usernameValue))
         .neq('id', userId)
         .maybeSingle();
       if (error) throw error;
@@ -140,6 +142,24 @@ export async function updateProfile(req: Request, res: Response): Promise<void> 
     }
 
     if (emailValue && emailValue !== req.user!.email) {
+      // The email decides who can recover this account, so make the caller prove it is really them.
+      if (!currentPassword) {
+        res.status(400).json({ success: false, message: 'Enter your current password to change your email.' });
+        return;
+      }
+
+      const { data: account, error: accountError } = await supabase
+        .from('users')
+        .select('password_hash')
+        .eq('id', userId)
+        .maybeSingle();
+      if (accountError) throw accountError;
+
+      if (!account || !(await bcrypt.compare(currentPassword, account.password_hash as string))) {
+        res.status(401).json({ success: false, message: 'Current password is incorrect.' });
+        return;
+      }
+
       const { data: taken, error } = await supabase
         .from('users')
         .select('id')
@@ -205,6 +225,11 @@ export async function updateProfile(req: Request, res: Response): Promise<void> 
       }
 
       updated = toUser(data as unknown as UserRow);
+
+      // The old profile photo is no longer used.
+      if (req.user!.avatar && req.user!.avatar !== updated.avatar) {
+        void deleteImages([req.user!.avatar]);
+      }
     }
 
     res.status(200).json({
@@ -306,13 +331,15 @@ export async function deleteMyPost(req: Request, res: Response): Promise<void> {
       .delete()
       .eq('id', postId)
       .eq('author_id', req.user!._id)
-      .select('id');
+      .select('id, images');
     if (error) throw error;
 
     if (!data || data.length === 0) {
       res.status(404).json({ success: false, message: 'Post not found or not yours' });
       return;
     }
+
+    void deleteImages(data.flatMap((row) => (row.images as string[] | null) ?? []));
 
     res.status(200).json({ success: true, message: 'Post deleted' });
   } catch (error) {
@@ -326,8 +353,22 @@ export async function deleteMyPost(req: Request, res: Response): Promise<void> {
 // memberships go with the account (see schema.sql).
 export async function deleteAccount(req: Request, res: Response): Promise<void> {
   try {
+    // Collect the images first: once the account is gone, so are the rows that point at them.
+    const { data: posts, error: postsError } = await supabase
+      .from('posts')
+      .select('images')
+      .eq('author_id', req.user!._id);
+    if (postsError) throw postsError;
+
+    const imageUrls = [
+      req.user!.avatar,
+      ...(posts ?? []).flatMap((post) => (post.images as string[] | null) ?? []),
+    ];
+
     const { error } = await supabase.from('users').delete().eq('id', req.user!._id);
     if (error) throw error;
+
+    void deleteImages(imageUrls);
 
     res.status(200).json({ success: true, message: 'Account deleted successfully' });
   } catch (error) {

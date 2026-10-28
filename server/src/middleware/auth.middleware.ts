@@ -15,6 +15,7 @@ export async function requireAuth(
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       res.status(401).json({
         success: false,
+        code: 'invalid_session',
         message: 'Authorization token is missing or invalid',
       });
       return;
@@ -27,6 +28,7 @@ export async function requireAuth(
     if (!isUuid(decoded.userId)) {
       res.status(401).json({
         success: false,
+        code: 'invalid_session',
         message: 'User not found or token is invalid',
       });
       return;
@@ -41,6 +43,7 @@ export async function requireAuth(
     if (error || !data) {
       res.status(401).json({
         success: false,
+        code: 'invalid_session',
         message: 'User not found or token is invalid',
       });
       return;
@@ -51,6 +54,7 @@ export async function requireAuth(
   } catch {
     res.status(401).json({
       success: false,
+      code: 'invalid_session',
       message: 'Unauthorized access',
     });
   }

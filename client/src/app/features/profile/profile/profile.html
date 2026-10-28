@@ -194,8 +194,10 @@
 
                 @if (claim.status === 'Pending') {
                   <div class="claim-card-actions">
-                    <button class="btn-approve" (click)="approveClaim(claim._id)">✓ Approve</button>
-                    <button class="btn-reject"  (click)="rejectClaim(claim._id)">✕ Reject</button>
+                    <button class="btn-approve" (click)="approveClaim(claim)" [disabled]="busyClaimId() !== null">
+                      @if (busyClaimId() === claim._id) { Working… } @else { ✓ Approve }
+                    </button>
+                    <button class="btn-reject" (click)="rejectClaim(claim)" [disabled]="busyClaimId() !== null">✕ Reject</button>
                   </div>
                 }
               </div>
@@ -259,17 +261,23 @@
             <div class="field-row">
               <div class="field-group">
                 <label for="editFullName">Full Name</label>
-                <input id="editFullName" type="text" [(ngModel)]="editFullName" name="editFullName" [disabled]="editLoading()" />
+                <input id="editFullName" type="text" [(ngModel)]="editFullName" name="editFullName" maxlength="100" autocomplete="name" [disabled]="editLoading()" />
               </div>
               <div class="field-group">
                 <label for="editUsername">Username</label>
-                <input id="editUsername" type="text" [(ngModel)]="editUsername" name="editUsername" [disabled]="editLoading()" />
+                <input id="editUsername" type="text" [(ngModel)]="editUsername" name="editUsername" maxlength="30" autocomplete="username" [disabled]="editLoading()" />
               </div>
             </div>
             <div class="field-group">
               <label for="editEmail">Email</label>
-              <input id="editEmail" type="email" [(ngModel)]="editEmail" name="editEmail" [disabled]="editLoading()" />
+              <input id="editEmail" type="email" [(ngModel)]="editEmail" name="editEmail" maxlength="254" autocomplete="email" [disabled]="editLoading()" />
             </div>
+            @if (emailChanged()) {
+              <div class="field-group">
+                <label for="editEmailPassword">Current password (needed to change your email)</label>
+                <input id="editEmailPassword" type="password" [(ngModel)]="editEmailPassword" name="editEmailPassword" maxlength="128" autocomplete="current-password" [disabled]="editLoading()" />
+              </div>
+            }
             <button type="submit" class="btn-save" [disabled]="editLoading()">
               @if (editLoading()) { Saving… } @else { Save Changes }
             </button>
@@ -286,16 +294,16 @@
           <form (ngSubmit)="onChangePassword()" novalidate>
             <div class="field-group">
               <label for="currentPassword">Current Password</label>
-              <input id="currentPassword" type="password" [(ngModel)]="currentPassword" name="currentPassword" [disabled]="passwordLoading()" />
+              <input id="currentPassword" type="password" [(ngModel)]="currentPassword" name="currentPassword" maxlength="128" autocomplete="current-password" [disabled]="passwordLoading()" />
             </div>
             <div class="field-row">
               <div class="field-group">
                 <label for="newPassword">New Password</label>
-                <input id="newPassword" type="password" [(ngModel)]="newPassword" name="newPassword" [disabled]="passwordLoading()" />
+                <input id="newPassword" type="password" [(ngModel)]="newPassword" name="newPassword" maxlength="72" autocomplete="new-password" [disabled]="passwordLoading()" />
               </div>
               <div class="field-group">
                 <label for="confirmNewPassword">Confirm New Password</label>
-                <input id="confirmNewPassword" type="password" [(ngModel)]="confirmNewPassword" name="confirmNewPassword" [disabled]="passwordLoading()" />
+                <input id="confirmNewPassword" type="password" [(ngModel)]="confirmNewPassword" name="confirmNewPassword" maxlength="72" autocomplete="new-password" [disabled]="passwordLoading()" />
               </div>
             </div>
             <button type="submit" class="btn-save" [disabled]="passwordLoading()">

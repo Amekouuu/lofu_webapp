@@ -9,6 +9,8 @@ export interface UpdateProfilePayload {
   username?: string;
   email?: string;
   avatar?: string;
+  // Needed by the server only when the email changes
+  currentPassword?: string;
 }
 
 export interface ChangePasswordPayload {

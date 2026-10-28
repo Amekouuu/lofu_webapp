@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, HostListener, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -36,13 +36,11 @@ export class Settings implements OnInit {
       document.documentElement.setAttribute('data-theme', saved);
     }
 
-    const privacyRaw = localStorage.getItem('lofu-privacy');
-    if (privacyRaw) {
-      try {
-        const prefs = JSON.parse(privacyRaw);
-        this.profileVisible.set(prefs.profileVisible ?? true);
-        this.showEmail.set(prefs.showEmail ?? false);
-      } catch { /* ignore */ }
+    // The server is the source of truth (it is what applies these settings), not this browser.
+    const privacy = this.currentUser()?.privacySettings;
+    if (privacy) {
+      this.profileVisible.set(privacy.profileVisible);
+      this.showEmail.set(privacy.showEmail);
     }
   }
 
@@ -64,7 +62,7 @@ export class Settings implements OnInit {
 
     this.userService.updatePrivacy(payload).subscribe({
       next: () => {
-        localStorage.setItem('lofu-privacy', JSON.stringify(payload));
+        this.authService.patchUser({ privacySettings: payload });
         this.privacySuccess.set('Privacy preferences saved.');
         this.privacySaving.set(false);
       },
@@ -73,6 +71,14 @@ export class Settings implements OnInit {
         this.privacySaving.set(false);
       },
     });
+  }
+
+  // Esc closes the delete dialog (unless the delete request is already running)
+  @HostListener('document:keydown.escape')
+  onEscape() {
+    if (this.showDeleteModal() && !this.deleteLoading()) {
+      this.closeDeleteModal();
+    }
   }
 
   openDeleteModal() {

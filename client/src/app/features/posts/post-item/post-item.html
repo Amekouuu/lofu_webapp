@@ -117,11 +117,11 @@
           <div class="field-row">
             <div class="field-group">
               <label for="color">Color</label>
-              <input id="color" type="text" [(ngModel)]="color" name="color" placeholder="e.g. Black, Brown, Blue" />
+              <input id="color" type="text" [(ngModel)]="color" name="color" placeholder="e.g. Black, Brown, Blue" maxlength="50" />
             </div>
             <div class="field-group">
               <label for="brand">Brand</label>
-              <input id="brand" type="text" [(ngModel)]="brand" name="brand" placeholder="e.g. Nike, Samsung, Coach" />
+              <input id="brand" type="text" [(ngModel)]="brand" name="brand" placeholder="e.g. Nike, Samsung, Coach" maxlength="50" />
             </div>
           </div>
 
@@ -144,6 +144,7 @@
               type="text"
               [(ngModel)]="locationDetails"
               name="locationDetails"
+              maxlength="200"
               placeholder="e.g. Near the main entrance, 2nd floor food court"
             />
           </div>
@@ -187,6 +188,7 @@
                   type="text"
                   [(ngModel)]="rewardOffered"
                   name="rewardOffered"
+                  maxlength="100"
                   placeholder="e.g. 500, 1000, Negotiable"
                   class="reward-input"
                 />
@@ -205,7 +207,16 @@
           <p class="step-desc">Photos help people identify the item faster. You can upload up to 4 images.</p>
 
           <!-- Upload area -->
-          <div class="upload-area" (click)="imageInput.click()" [class.upload-full]="imagePreviews().length >= 4">
+          <div
+            class="upload-area"
+            role="button"
+            tabindex="0"
+            aria-label="Add photos"
+            (click)="imageInput.click()"
+            (keydown.enter)="imageInput.click()"
+            (keydown.space)="$event.preventDefault(); imageInput.click()"
+            [class.upload-full]="imagePreviews().length >= 4"
+          >
             <input
               #imageInput
               type="file"
@@ -220,8 +231,12 @@
                 <circle cx="8.5" cy="8.5" r="1.5"/>
                 <polyline points="21,15 16,10 5,21"/>
               </svg>
-              <p class="upload-label">Click to upload images</p>
-              <p class="upload-hint">PNG, JPG up to 5MB each · {{ imagePreviews().length }}/4 uploaded</p>
+              @if (processingImages() > 0) {
+                <p class="upload-label">Processing photos…</p>
+              } @else {
+                <p class="upload-label">Click to upload images</p>
+              }
+              <p class="upload-hint">JPG, PNG, WEBP or GIF · resized automatically · {{ imagePreviews().length }}/4 added</p>
             } @else {
               <p class="upload-label">Maximum images reached</p>
             }
@@ -233,7 +248,7 @@
               @for (preview of imagePreviews(); track $index) {
                 <div class="preview-wrap">
                   <img [src]="preview" alt="Preview {{ $index + 1 }}" />
-                  <button type="button" class="preview-remove" (click)="removeImage($index)">
+                  <button type="button" class="preview-remove" (click)="removeImage($index)" [attr.aria-label]="'Remove photo ' + ($index + 1)">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
                       <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
                     </svg>
@@ -303,8 +318,10 @@
           @if (currentStep() < totalSteps) {
             <button type="button" class="btn-next" (click)="nextStep()">Next →</button>
           } @else {
-            <button type="button" class="btn-submit" (click)="onSubmit()" [disabled]="isLoading()">
-              @if (isLoading()) { Posting… } @else { Post! }
+            <button type="button" class="btn-submit" (click)="onSubmit()" [disabled]="isLoading() || processingImages() > 0">
+              @if (isLoading()) {
+                @if (imagePreviews().length > 0) { Uploading photos… } @else { Posting… }
+              } @else if (processingImages() > 0) { Processing photos… } @else { Post! }
             </button>
           }
         </div>

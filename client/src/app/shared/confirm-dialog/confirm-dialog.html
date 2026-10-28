@@ -1,0 +1,30 @@
+@if (confirmService.request(); as request) {
+  <div class="confirm-backdrop" (click)="confirmService.answer(false)">
+    <div
+      class="confirm-dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="confirm-title"
+      aria-describedby="confirm-message"
+      (click)="$event.stopPropagation()"
+      (keydown)="onKeydown($event)"
+    >
+      <h2 id="confirm-title" class="confirm-title">{{ request.title }}</h2>
+      <p id="confirm-message" class="confirm-message">{{ request.message }}</p>
+
+      <div class="confirm-actions">
+        <button #cancelButton type="button" class="confirm-btn confirm-btn-cancel" (click)="confirmService.answer(false)">
+          {{ request.cancelLabel ?? 'Cancel' }}
+        </button>
+        <button
+          type="button"
+          class="confirm-btn confirm-btn-ok"
+          [class.confirm-btn-danger]="request.tone === 'danger'"
+          (click)="confirmService.answer(true)"
+        >
+          {{ request.confirmLabel ?? 'Confirm' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

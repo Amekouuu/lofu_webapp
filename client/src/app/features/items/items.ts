@@ -2,9 +2,10 @@ import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { debounceTime, distinctUntilChanged, Subject, switchMap } from 'rxjs';
+import { catchError, debounceTime, distinctUntilChanged, of, Subject, switchMap } from 'rxjs';
 import { PostService } from '../../core/services/post.service';
 import { AuthService } from '../../core/services/auth.service';
+import { ToastService } from '../../core/services/toast.service';
 import { Post, PostType } from '../../core/models/post.model';
 
 @Component({
@@ -17,6 +18,7 @@ export class Items implements OnInit {
   private readonly postService = inject(PostService);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly toast = inject(ToastService);
 
   readonly isLoggedIn = this.authService.isLoggedIn;
 
@@ -50,10 +52,19 @@ export class Items implements OnInit {
           type: this.activeTab(),
           search: query,
           page: 1,
-        })
+        }).pipe(
+          // A failed request must not end the whole search stream, or search stays broken until reload.
+          catchError(() => of(null))
+        )
       )
     ).subscribe({
       next: (res) => {
+        if (!res) {
+          this.isLoading.set(false);
+          this.toast.error('Search failed. Please try again.');
+          return;
+        }
+
         this.posts.set(res.posts);
         this.lostCount.set(res.counts.lost);
         this.foundCount.set(res.counts.found);
@@ -124,7 +135,7 @@ export class Items implements OnInit {
 
   onActionClick(post: Post) {
     if (!this.isLoggedIn()) {
-      this.router.navigate(['/login']);
+      this.router.navigate(['/login'], { queryParams: { returnUrl: `/posts/${post._id}` } });
       return;
     }
     this.router.navigate(['/posts', post._id]);

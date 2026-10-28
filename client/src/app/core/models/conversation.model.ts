@@ -19,6 +19,8 @@ export interface Conversation {
   claim: string;
   lastMessage?: string;
   lastMessageAt?: string;
+  // Who wrote the newest message (null when unknown)
+  lastMessageSenderId?: string | null;
   createdAt: string;
 }
 

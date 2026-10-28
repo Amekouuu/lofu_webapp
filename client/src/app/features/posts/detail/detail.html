@@ -216,8 +216,10 @@
 
                       @if (claim.status === 'Pending') {
                         <div class="claim-actions">
-                          <button class="btn-approve" (click)="approveClaim(claim._id)">✓ Approve</button>
-                          <button class="btn-reject"  (click)="rejectClaim(claim._id)">✕ Reject</button>
+                          <button class="btn-approve" (click)="approveClaim(claim)" [disabled]="busyClaimId() !== null">
+                            @if (busyClaimId() === claim._id) { Working… } @else { ✓ Approve }
+                          </button>
+                          <button class="btn-reject" (click)="rejectClaim(claim)" [disabled]="busyClaimId() !== null">✕ Reject</button>
                         </div>
                       }
                     </div>
@@ -235,7 +237,7 @@
               </svg>
               <h3>Know something about this item?</h3>
               <p>Log in to submit a claim and help return it to its owner.</p>
-              <a routerLink="/login" class="btn-login-prompt">Log in to Claim</a>
+              <a routerLink="/login" [queryParams]="{ returnUrl: '/posts/' + post()!._id }" class="btn-login-prompt">Log in to Claim</a>
             </div>
           }
 
@@ -256,24 +258,24 @@
               <p class="side-subtitle">Fill in the details below to submit your claim.</p>
 
               @if (claimSuccess()) { <div class="alert-success">{{ claimSuccess() }}</div> }
-              @if (claimError())   { <div class="alert-error">{{ claimError() }}</div> }
+              @if (claimError())   { <div class="alert-error" role="alert">{{ claimError() }}</div> }
 
               <form (ngSubmit)="onClaimSubmit()" novalidate>
                 <div class="field-group">
                   <label for="claimMessage">Your message <span class="required">*</span></label>
-                  <textarea id="claimMessage" [(ngModel)]="claimMessage" name="claimMessage"
+                  <textarea id="claimMessage" [(ngModel)]="claimMessage" name="claimMessage" maxlength="1000"
                     placeholder="Explain why this item belongs to you or what you know about it..."
                     rows="3" [disabled]="claimLoading()"></textarea>
                 </div>
                 <div class="field-group">
                   <label for="claimProof">Proof of ownership / details <span class="required">*</span></label>
-                  <textarea id="claimProof" [(ngModel)]="claimProof" name="claimProof"
+                  <textarea id="claimProof" [(ngModel)]="claimProof" name="claimProof" maxlength="1000"
                     placeholder="Describe identifying details only the real owner would know..."
                     rows="3" [disabled]="claimLoading()"></textarea>
                 </div>
                 <div class="field-group">
                   <label for="claimContact">Contact info <span class="optional">(optional)</span></label>
-                  <input id="claimContact" type="text" [(ngModel)]="claimContact" name="claimContact"
+                  <input id="claimContact" type="text" [(ngModel)]="claimContact" name="claimContact" maxlength="200"
                     placeholder="Phone number, Facebook, etc." [disabled]="claimLoading()" />
                 </div>
                 <button type="submit" class="btn-submit-claim" [disabled]="claimLoading()">

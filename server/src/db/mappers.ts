@@ -165,6 +165,8 @@ export interface ConversationRow {
   updated_at: string;
   post?: PostSummaryRow | null;
   participants?: { user: UserSummaryRow | null }[];
+  // The newest message only (the query limits it to one): used to know who wrote it
+  latest?: { sender_id: string | null; created_at: string }[];
 }
 
 export function toConversation(row: ConversationRow) {
@@ -178,6 +180,7 @@ export function toConversation(row: ConversationRow) {
     claim: row.claim_id,
     lastMessage: row.last_message,
     lastMessageAt: row.last_message_at ?? undefined,
+    lastMessageSenderId: row.latest?.[0]?.sender_id ?? null,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };

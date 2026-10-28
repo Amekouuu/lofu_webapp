@@ -14,4 +14,24 @@ export const env = {
   cloudinaryCloudName: process.env.CLOUDINARY_CLOUD_NAME || '',
   cloudinaryApiKey:    process.env.CLOUDINARY_API_KEY || '',
   cloudinaryApiSecret: process.env.CLOUDINARY_API_SECRET || '',
-};
+};
+
+// Called once at startup. A server that is missing a secret should refuse to start, not run for
+// hours and then fail the first person who tries to log in.
+export function validateEnv(): void {
+  const problems: string[] = [];
+
+  if (!env.jwtSecret) {
+    problems.push('JWT_SECRET is not set');
+  } else if (env.nodeEnv === 'production' && env.jwtSecret.length < 32) {
+    problems.push('JWT_SECRET must be at least 32 characters in production');
+  }
+
+  if (problems.length > 0) {
+    throw new Error('Invalid server configuration: ' + problems.join('; '));
+  }
+
+  if (!env.cloudinaryCloudName || !env.cloudinaryApiKey || !env.cloudinaryApiSecret) {
+    console.warn('Cloudinary is not fully configured: uploading photos will fail.');
+  }
+}

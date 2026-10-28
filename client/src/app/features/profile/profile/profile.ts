@@ -5,6 +5,10 @@ import { RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { UserService } from '../../../core/services/user.service';
 import { ClaimService } from '../../../core/services/claim.service';
+import { ConfirmService } from '../../../core/services/confirm.service';
+import { ToastService } from '../../../core/services/toast.service';
+import { compressImage, validateImageFile } from '../../../core/utils/image';
+import { isValidEmail, usernameError } from '../../../core/utils/validators';
 import { Post } from '../../../core/models/post.model';
 import { Claim } from '../../../core/models/claim.model';
 
@@ -20,6 +24,8 @@ export class Profile implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly userService = inject(UserService);
   private readonly claimService = inject(ClaimService);
+  private readonly confirmService = inject(ConfirmService);
+  private readonly toast = inject(ToastService);
 
   @ViewChild('avatarInput') avatarInput!: ElementRef<HTMLInputElement>;
 
@@ -41,6 +47,8 @@ export class Profile implements OnInit {
   editFullName = '';
   editUsername = '';
   editEmail = '';
+  // Asked for only when the email address is being changed
+  editEmailPassword = '';
   editLoading = signal(false);
   editSuccess = signal('');
   editError = signal('');
@@ -59,6 +67,9 @@ export class Profile implements OnInit {
 
   // Delete post confirm
   deletingPostId = signal<string | null>(null);
+
+  // Id of the claim whose approve/reject request is running (disables the buttons, stops double clicks)
+  busyClaimId = signal<string | null>(null);
 
   ngOnInit() {
     this.loadMyPosts();
@@ -90,49 +101,43 @@ export class Profile implements OnInit {
     this.avatarInput.nativeElement.click();
   }
 
-  onAvatarFileSelected(event: Event) {
+  async onAvatarFileSelected(event: Event) {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
+    // Reset so choosing the same file again still fires a change event.
+    input.value = '';
     if (!file) return;
 
-    // Validate type
-    if (!file.type.startsWith('image/')) {
-      this.avatarError.set('Please select an image file.');
-      return;
-    }
-
-    // Validate size (max 2MB)
-    if (file.size > 2 * 1024 * 1024) {
-      this.avatarError.set('Image must be under 2MB.');
+    const problem = validateImageFile(file);
+    if (problem) {
+      this.avatarError.set(problem);
       return;
     }
 
     this.avatarError.set('');
     this.avatarLoading.set(true);
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      const base64 = reader.result as string;
-
-      this.userService.updateProfile({ avatar: base64 }).subscribe({
-        next: (res) => {
-          (this.authService as any).currentUserSignal?.set(res.user);
-          this.avatarLoading.set(false);
-        },
-        error: () => {
-          this.avatarError.set('Failed to update avatar. Please try again.');
-          this.avatarLoading.set(false);
-        },
-      });
-    };
-    reader.onerror = () => {
-      this.avatarError.set('Could not read the file.');
+    let avatar: string;
+    try {
+      // Avatars are shown small, so 512px is plenty and keeps the upload tiny.
+      avatar = await compressImage(file, { maxSize: 512, quality: 0.85 });
+    } catch {
+      this.avatarError.set('That image could not be read. Please try a different one.');
       this.avatarLoading.set(false);
-    };
-    reader.readAsDataURL(file);
+      return;
+    }
 
-    // Reset input so the same file can be re-selected
-    input.value = '';
+    this.userService.updateProfile({ avatar }).subscribe({
+      next: (res) => {
+        this.authService.patchUser(res.user);
+        this.avatarLoading.set(false);
+        this.toast.success('Profile photo updated.');
+      },
+      error: (err) => {
+        this.avatarError.set(err?.error?.message || 'Failed to update your photo. Please try again.');
+        this.avatarLoading.set(false);
+      },
+    });
   }
 
   // ── My Posts ──────────────────────────────────
@@ -157,6 +162,11 @@ export class Profile implements OnInit {
       next: () => {
         this.myPosts.update(posts => posts.filter(p => p._id !== postId));
         this.deletingPostId.set(null);
+        this.toast.success('Post deleted.');
+      },
+      error: (err) => {
+        this.deletingPostId.set(null);
+        this.toast.error(err?.error?.message || 'Could not delete the post. Please try again.');
       },
     });
   }
@@ -170,26 +180,60 @@ export class Profile implements OnInit {
     });
   }
 
-  approveClaim(claimId: string) {
-    this.claimService.approveClaim(claimId).subscribe({
+  async approveClaim(claim: Claim) {
+    if (this.busyClaimId()) return;
+
+    const confirmed = await this.confirmService.confirm({
+      title: `Approve ${claim.claimant.fullName}'s claim?`,
+      message:
+        'This marks the item as returned, rejects every other claim on this post, and opens a chat with this person. It cannot be undone.',
+      confirmLabel: 'Approve claim',
+    });
+    if (!confirmed) return;
+
+    this.busyClaimId.set(claim._id);
+    this.claimService.approveClaim(claim._id).subscribe({
       next: () => {
         this.incomingClaims.update(claims =>
-          claims.map(c => c._id === claimId
+          claims.map(c => c._id === claim._id
             ? { ...c, status: 'Approved' as const }
             : { ...c, status: c.status === 'Pending' ? 'Rejected' as const : c.status }
           )
         );
+        this.busyClaimId.set(null);
+        this.toast.success(`Claim approved. You can now chat with ${claim.claimant.fullName} in Messages.`);
         this.loadMyPosts();
+      },
+      error: (err) => {
+        this.busyClaimId.set(null);
+        this.toast.error(err?.error?.message || 'Could not approve the claim. Please try again.');
       },
     });
   }
 
-  rejectClaim(claimId: string) {
-    this.claimService.rejectClaim(claimId).subscribe({
+  async rejectClaim(claim: Claim) {
+    if (this.busyClaimId()) return;
+
+    const confirmed = await this.confirmService.confirm({
+      title: `Reject ${claim.claimant.fullName}'s claim?`,
+      message: 'They will not be able to submit another claim for this post.',
+      confirmLabel: 'Reject claim',
+      tone: 'danger',
+    });
+    if (!confirmed) return;
+
+    this.busyClaimId.set(claim._id);
+    this.claimService.rejectClaim(claim._id).subscribe({
       next: () => {
         this.incomingClaims.update(claims =>
-          claims.map(c => c._id === claimId ? { ...c, status: 'Rejected' as const } : c)
+          claims.map(c => c._id === claim._id ? { ...c, status: 'Rejected' as const } : c)
         );
+        this.busyClaimId.set(null);
+        this.toast.info('Claim rejected.');
+      },
+      error: (err) => {
+        this.busyClaimId.set(null);
+        this.toast.error(err?.error?.message || 'Could not reject the claim. Please try again.');
       },
     });
   }
@@ -204,23 +248,48 @@ export class Profile implements OnInit {
   }
 
   // ── Edit Profile ──────────────────────────────
+  emailChanged(): boolean {
+    return this.editEmail.trim().toLowerCase() !== (this.currentUser()?.email ?? '').toLowerCase();
+  }
+
   onUpdateProfile() {
     this.editSuccess.set('');
     this.editError.set('');
 
-    if (!this.editFullName.trim() || !this.editUsername.trim() || !this.editEmail.trim()) {
-      this.editError.set('All fields are required.');
+    const fullName = this.editFullName.trim();
+    const username = this.editUsername.trim();
+
+    if (fullName.length < 2 || fullName.length > 100) {
+      this.editError.set('Full name must be between 2 and 100 characters.');
+      return;
+    }
+
+    const usernameProblem = usernameError(username);
+    if (usernameProblem) {
+      this.editError.set(usernameProblem);
+      return;
+    }
+
+    if (!isValidEmail(this.editEmail)) {
+      this.editError.set('Please enter a valid email address.');
+      return;
+    }
+
+    if (this.emailChanged() && !this.editEmailPassword) {
+      this.editError.set('Enter your current password to change your email.');
       return;
     }
 
     this.editLoading.set(true);
     this.userService.updateProfile({
-      fullName: this.editFullName.trim(),
-      username: this.editUsername.trim(),
-      email:    this.editEmail.trim(),
+      fullName,
+      username,
+      email: this.editEmail.trim(),
+      ...(this.emailChanged() && { currentPassword: this.editEmailPassword }),
     }).subscribe({
       next: (res) => {
-        (this.authService as any).currentUserSignal?.set(res.user);
+        this.authService.patchUser(res.user);
+        this.editEmailPassword = '';
         this.editSuccess.set('Profile updated successfully!');
         this.editLoading.set(false);
       },

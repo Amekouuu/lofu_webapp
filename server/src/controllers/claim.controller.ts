@@ -199,6 +199,31 @@ export async function approveClaim(req: Request, res: Response): Promise<void> {
       return;
     }
 
+    if (post.status === 'Resolved') {
+      res.status(409).json({ success: false, message: 'This post is already resolved' });
+      return;
+    }
+
+    // Preferred path: one database transaction (see supabase/migrations/002_*.sql).
+    const { error: rpcError } = await supabase.rpc('approve_claim', {
+      p_claim_id: claim.id,
+      p_owner_id: req.user!._id,
+    });
+
+    if (!rpcError) {
+      res.status(200).json({ success: true, message: 'Claim approved and post marked as resolved' });
+      return;
+    }
+
+    if (rpcError.message === 'already_resolved') {
+      res.status(409).json({ success: false, message: 'This post is already resolved' });
+      return;
+    }
+
+    // PGRST202 = "function not found": the migration has not been run on this database yet, so
+    // fall back to the older step-by-step path below. Anything else is a real failure.
+    if (rpcError.code !== 'PGRST202') throw rpcError;
+
     // Approve this claim
     const { error: approveError } = await supabase
       .from('claims')

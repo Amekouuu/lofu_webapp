@@ -84,6 +84,55 @@ html, body {
 }
 
 a { color: inherit; text-decoration: none; }
+
+/* Claim buttons are disabled while an approve/reject request is running */
+.btn-approve:disabled, .btn-reject:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* Field-level form errors: text under the field, red border, linked with aria-describedby */
+.field-error {
+  color: var(--error);
+  font-size: 0.8rem;
+  line-height: 1.4;
+  margin-top: 0.35rem;
+}
+
+/* For errors placed after a whole field group (e.g. password fields with an icon button): tuck them
+   up under their own input instead of floating in the gap before the next field */
+.field-error-below {
+  margin-top: -1rem;
+  margin-bottom: 1.25rem;
+}
+
+input[aria-invalid="true"],
+textarea[aria-invalid="true"],
+select[aria-invalid="true"] {
+  border-color: var(--error) !important;
+}
+
+/* Unread conversations in the messages list */
+.unread-dot {
+  width: 8px;
+  height: 8px;
+  flex-shrink: 0;
+  margin-left: 0.4rem;
+  border-radius: 50%;
+  background: var(--primary);
+}
+
+.convo-item.unread .convo-name { font-weight: 700; color: var(--text-dark); }
+
+/* Present for screen readers and bots, invisible to sighted users (used for the contact honeypot) */
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
 button, input, select, textarea { font: inherit; }
 img { max-width: 100%; display: block; }
 

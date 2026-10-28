@@ -5,6 +5,11 @@ export function isUuid(value: unknown): value is string {
   return typeof value === 'string' && UUID_RE.test(value);
 }
 
+// Escapes %, _ and \ so a value can be matched literally by ILIKE (for case-insensitive equality).
+export function likeLiteral(value: string): string {
+  return value.replace(/[\\%_]/g, '\\$&');
+}
+
 // Postgres unique_violation
 export function isUniqueViolation(error: { code?: string } | null | undefined): boolean {
   return error?.code === '23505';

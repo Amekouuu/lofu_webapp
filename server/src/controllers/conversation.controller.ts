@@ -14,6 +14,7 @@ import { isUuid } from '../db/utils';
 const CONVERSATION_SELECT = [
   'id, post_id, claim_id, last_message, last_message_at, created_at, updated_at',
   'post:posts!post_id(id, item_name, type, images)',
+  'latest:messages(sender_id, created_at)',
   `participants:conversation_participants(user:users!user_id(${USER_SUMMARY_COLUMNS}))`,
 ].join(', ');
 
@@ -38,7 +39,10 @@ export async function getConversations(req: Request, res: Response): Promise<voi
       .select(CONVERSATION_SELECT)
       .in('id', ids)
       .order('last_message_at', { ascending: false, nullsFirst: false })
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false })
+      // for the embedded messages: newest first, and only one per conversation
+      .order('created_at', { ascending: false, referencedTable: 'messages' })
+      .limit(1, { referencedTable: 'messages' });
     if (error) throw error;
 
     res.status(200).json({

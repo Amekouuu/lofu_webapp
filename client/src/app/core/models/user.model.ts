@@ -6,6 +6,7 @@ export interface User {
   email: string;
   avatar: string;
   role: 'user' | 'admin';
+  privacySettings?: { profileVisible: boolean; showEmail: boolean };
   createdAt: string;
   updatedAt: string;
 }

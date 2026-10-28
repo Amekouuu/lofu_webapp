@@ -85,6 +85,11 @@ export class AuthService {
     );
   }
 
+  // Merge changes into the signed-in user (after editing the profile, avatar or privacy settings).
+  patchUser(changes: Partial<User>): void {
+    this.currentUserSignal.update((user) => (user ? { ...user, ...changes } : user));
+  }
+
   logout(): void {
     this.storageService.clear();
     this.currentUserSignal.set(null);

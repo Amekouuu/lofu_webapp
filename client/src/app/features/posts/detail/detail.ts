@@ -5,6 +5,8 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { PostService } from '../../../core/services/post.service';
 import { ClaimService } from '../../../core/services/claim.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { ConfirmService } from '../../../core/services/confirm.service';
+import { ToastService } from '../../../core/services/toast.service';
 import { Post } from '../../../core/models/post.model';
 import { Claim } from '../../../core/models/claim.model';
 
@@ -20,6 +22,8 @@ export class Detail implements OnInit {
   private readonly postService  = inject(PostService);
   private readonly claimService = inject(ClaimService);
   private readonly authService  = inject(AuthService);
+  private readonly confirmService = inject(ConfirmService);
+  private readonly toast        = inject(ToastService);
 
   readonly currentUser = this.authService.currentUser;
   readonly isLoggedIn  = this.authService.isLoggedIn;
@@ -43,6 +47,8 @@ export class Detail implements OnInit {
 
   // Incoming claims (for post owner)
   incomingClaims   = signal<Claim[]>([]);
+  // Id of the claim whose approve/reject request is running (disables the buttons, stops double clicks)
+  busyClaimId      = signal<string | null>(null);
   claimsLoading    = signal(false);
 
   ngOnInit() {
@@ -92,7 +98,7 @@ export class Detail implements OnInit {
     this.claimSuccess.set('');
 
     if (!this.isLoggedIn()) {
-      this.router.navigate(['/login']);
+      this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } });
       return;
     }
 
@@ -130,28 +136,62 @@ export class Detail implements OnInit {
     });
   }
 
-  approveClaim(claimId: string) {
-    this.claimService.approveClaim(claimId).subscribe({
+  async approveClaim(claim: Claim) {
+    if (this.busyClaimId()) return;
+
+    const confirmed = await this.confirmService.confirm({
+      title: `Approve ${claim.claimant.fullName}'s claim?`,
+      message:
+        'This marks the item as returned, rejects every other claim on this post, and opens a chat with this person. It cannot be undone.',
+      confirmLabel: 'Approve claim',
+    });
+    if (!confirmed) return;
+
+    this.busyClaimId.set(claim._id);
+    this.claimService.approveClaim(claim._id).subscribe({
       next: () => {
         this.incomingClaims.update(claims =>
           claims.map(c =>
-            c._id === claimId
+            c._id === claim._id
               ? { ...c, status: 'Approved' as const }
               : { ...c, status: c.status === 'Pending' ? 'Rejected' as const : c.status }
           )
         );
+        this.busyClaimId.set(null);
+        this.toast.success(`Claim approved. You can now chat with ${claim.claimant.fullName} in Messages.`);
         const postId = this.post()?._id;
         if (postId) this.loadPost(postId);
+      },
+      error: (err) => {
+        this.busyClaimId.set(null);
+        this.toast.error(err?.error?.message || 'Could not approve the claim. Please try again.');
       },
     });
   }
 
-  rejectClaim(claimId: string) {
-    this.claimService.rejectClaim(claimId).subscribe({
+  async rejectClaim(claim: Claim) {
+    if (this.busyClaimId()) return;
+
+    const confirmed = await this.confirmService.confirm({
+      title: `Reject ${claim.claimant.fullName}'s claim?`,
+      message: 'They will not be able to submit another claim for this post.',
+      confirmLabel: 'Reject claim',
+      tone: 'danger',
+    });
+    if (!confirmed) return;
+
+    this.busyClaimId.set(claim._id);
+    this.claimService.rejectClaim(claim._id).subscribe({
       next: () => {
         this.incomingClaims.update(claims =>
-          claims.map(c => c._id === claimId ? { ...c, status: 'Rejected' as const } : c)
+          claims.map(c => c._id === claim._id ? { ...c, status: 'Rejected' as const } : c)
         );
+        this.busyClaimId.set(null);
+        this.toast.info('Claim rejected.');
+      },
+      error: (err) => {
+        this.busyClaimId.set(null);
+        this.toast.error(err?.error?.message || 'Could not reject the claim. Please try again.');
       },
     });
   }

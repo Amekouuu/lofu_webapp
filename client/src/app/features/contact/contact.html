@@ -57,10 +57,10 @@
       <h2 class="form-heading">Send us a message</h2>
 
       @if (successMsg()) {
-        <div class="alert-success">{{ successMsg() }}</div>
+        <div class="alert-success" role="status">{{ successMsg() }}</div>
       }
       @if (errorMsg()) {
-        <div class="alert-error">{{ errorMsg() }}</div>
+        <div class="alert-error" role="alert">{{ errorMsg() }}</div>
       }
 
       <form (ngSubmit)="onSubmit()" #contactForm="ngForm" novalidate>
@@ -74,8 +74,16 @@
               [(ngModel)]="name"
               name="name"
               placeholder="John Doe"
+              autocomplete="name"
+              [attr.maxlength]="limits.contactName"
+              [attr.aria-invalid]="fieldErrors()['name'] ? 'true' : null"
+              [attr.aria-describedby]="fieldErrors()['name'] ? 'name-error' : null"
+              (input)="clearFieldError('name')"
               [disabled]="isLoading()"
             />
+            @if (fieldErrors()['name']) {
+              <p class="field-error" id="name-error">{{ fieldErrors()['name'] }}</p>
+            }
           </div>
           <div class="field-group">
             <label for="email">Email</label>
@@ -85,8 +93,16 @@
               [(ngModel)]="email"
               name="email"
               placeholder="john@email.com"
+              autocomplete="email"
+              [attr.maxlength]="limits.email"
+              [attr.aria-invalid]="fieldErrors()['email'] ? 'true' : null"
+              [attr.aria-describedby]="fieldErrors()['email'] ? 'email-error' : null"
+              (input)="clearFieldError('email')"
               [disabled]="isLoading()"
             />
+            @if (fieldErrors()['email']) {
+              <p class="field-error" id="email-error">{{ fieldErrors()['email'] }}</p>
+            }
           </div>
         </div>
 
@@ -98,8 +114,15 @@
             [(ngModel)]="subject"
             name="subject"
             placeholder="How can we help?"
+            [attr.maxlength]="limits.contactSubject"
+            [attr.aria-invalid]="fieldErrors()['subject'] ? 'true' : null"
+            [attr.aria-describedby]="fieldErrors()['subject'] ? 'subject-error' : null"
+            (input)="clearFieldError('subject')"
             [disabled]="isLoading()"
           />
+          @if (fieldErrors()['subject']) {
+            <p class="field-error" id="subject-error">{{ fieldErrors()['subject'] }}</p>
+          }
         </div>
 
         <div class="field-group">
@@ -110,8 +133,21 @@
             name="message"
             placeholder="Write your message here..."
             rows="6"
+            [attr.maxlength]="limits.contactMessage"
+            [attr.aria-invalid]="fieldErrors()['message'] ? 'true' : null"
+            [attr.aria-describedby]="fieldErrors()['message'] ? 'message-error' : null"
+            (input)="clearFieldError('message')"
             [disabled]="isLoading()"
           ></textarea>
+          @if (fieldErrors()['message']) {
+            <p class="field-error" id="message-error">{{ fieldErrors()['message'] }}</p>
+          }
+        </div>
+
+        <!-- Honeypot: real visitors never see or fill this -->
+        <div class="visually-hidden" aria-hidden="true">
+          <label for="website">Leave this field empty</label>
+          <input id="website" type="text" name="website" [(ngModel)]="website" tabindex="-1" autocomplete="off" />
         </div>
 
         <button type="submit" class="btn-primary" [disabled]="isLoading()">

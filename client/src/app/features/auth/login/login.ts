@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { ToastService } from '../../../core/services/toast.service';
+import { safeReturnUrl } from '../../../core/utils/safe-redirect';
 
 @Component({
   selector: 'app-login',
@@ -14,6 +16,10 @@ export class Login {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  private readonly toast = inject(ToastService);
+
+  // Where to go after logging in (set by the auth guard and the "log in to claim" links).
+  readonly returnUrl = safeReturnUrl(this.route.snapshot.queryParamMap.get('returnUrl'));
 
   emailOrUsername = '';
   password = '';
@@ -47,8 +53,9 @@ export class Login {
       emailOrUsername: this.emailOrUsername.trim(),
       password: this.password,
     }).subscribe({
-      next: () => {
-        this.router.navigate(['/home']);
+      next: (res) => {
+        this.toast.success(`Welcome back, ${res.user.fullName.split(' ')[0]}!`);
+        this.router.navigateByUrl(this.returnUrl ?? '/home');
       },
       error: (err) => {
         const msg = err?.error?.message || 'Login failed. Please try again.';

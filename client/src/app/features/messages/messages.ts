@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { ConversationService } from '../../core/services/conversation.service';
+import { ToastService } from '../../core/services/toast.service';
 import { Conversation, ChatMessage } from '../../core/models/conversation.model';
 
 @Component({
@@ -22,11 +23,13 @@ export class Messages implements OnInit, OnDestroy, AfterViewChecked {
   messagesLoading = signal(false);
   convoLoading = signal(true);
   messageInput = '';
+  sending = signal(false);
   private shouldScroll = false;
 
   constructor(
     private authService: AuthService,
     public convoService: ConversationService,
+    private toast: ToastService,
   ) {
     this.currentUser = this.authService.currentUser;
   }
@@ -54,6 +57,7 @@ export class Messages implements OnInit, OnDestroy, AfterViewChecked {
     if (prev) this.convoService.leaveConversation(prev._id);
 
     this.selectedConversation.set(convo);
+    this.convoService.markSeen(convo._id, convo.lastMessageAt ?? new Date().toISOString());
     this.convoService.messages.set([]);
     this.messagesLoading.set(true);
 
@@ -71,16 +75,23 @@ export class Messages implements OnInit, OnDestroy, AfterViewChecked {
   sendMessage() {
     const content = this.messageInput.trim();
     const convo = this.selectedConversation();
-    const user = this.currentUser();
-    if (!content || !convo || !user) return;
+    if (!content || !convo || this.sending()) return;
 
     this.messageInput = '';
-    this.convoService.sendMessage(convo._id, content, {
-      _id: user._id,
-      fullName: user.fullName,
-      avatar: user.avatar,
+    this.sending.set(true);
+
+    this.convoService.sendMessage(convo._id, content).subscribe({
+      next: () => {
+        this.sending.set(false);
+        this.shouldScroll = true;
+      },
+      error: (err) => {
+        this.sending.set(false);
+        // Give the text back so it is not lost, unless they have already started typing again.
+        if (!this.messageInput.trim()) this.messageInput = content;
+        this.toast.error(err?.error?.message || 'Your message was not sent. Please try again.');
+      },
     });
-    this.shouldScroll = true;
   }
 
   onKeydown(event: KeyboardEvent) {

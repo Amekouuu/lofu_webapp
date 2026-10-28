@@ -1,12 +1,13 @@
 import http from 'http';
 import { Server as SocketServer } from 'socket.io';
 import app from './app';
-import { env } from './config/env';
+import { env, validateEnv } from './config/env';
 import { connectDatabase } from './config/database';
 import { createMessage, isConversationParticipant } from './db/chat';
 import { isUuid } from './db/utils';
 
 async function startServer(): Promise<void> {
+  validateEnv();
   await connectDatabase();
 
   // Create HTTP server from Express app

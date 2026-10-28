@@ -142,6 +142,8 @@ export const updateProfileSchema = z.object({
   fullName: text('Full name', 100, 2).optional(),
   username: username.optional(),
   email: email.optional(),
+  // Required only when the email actually changes (checked in the controller)
+  currentPassword: z.string().max(128, { error: 'Current password is too long.' }).optional(),
   // '' removes the avatar; otherwise a base64 image that the server uploads to Cloudinary.
   avatar: z
     .union([z.literal(''), imageDataUrl(MAX_AVATAR_CHARS, 'Avatar image is too large (max 2 MB).')])

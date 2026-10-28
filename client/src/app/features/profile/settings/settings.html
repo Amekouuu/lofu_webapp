@@ -109,6 +109,7 @@
             class="toggle-switch"
             [class.on]="profileVisible()"
             (click)="profileVisible.set(!profileVisible())"
+            aria-label="Public profile"
             [attr.aria-checked]="profileVisible()"
             role="switch"
           >
@@ -127,6 +128,7 @@
             class="toggle-switch"
             [class.on]="showEmail()"
             (click)="showEmail.set(!showEmail())"
+            aria-label="Show email on profile"
             [attr.aria-checked]="showEmail()"
             role="switch"
           >
@@ -173,7 +175,7 @@
 <!-- ── Delete Confirm Modal ── -->
 @if (showDeleteModal()) {
   <div class="modal-backdrop" (click)="closeDeleteModal()">
-    <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="delete-account-title" (click)="$event.stopPropagation()">
       <div class="modal-icon">
         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
@@ -181,7 +183,7 @@
           <line x1="12" y1="17" x2="12.01" y2="17"/>
         </svg>
       </div>
-      <h3 class="modal-title">Delete your account?</h3>
+      <h3 class="modal-title" id="delete-account-title">Delete your account?</h3>
       <p class="modal-body">
         This will permanently delete your account, all your posts, and all your claims.
         <strong>This action cannot be undone.</strong>
@@ -190,6 +192,7 @@
       <input
         type="text"
         class="modal-input"
+        aria-label="Type delete my account to confirm"
         [(ngModel)]="deleteConfirmText"
         placeholder="delete my account"
         [disabled]="deleteLoading()"

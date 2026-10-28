@@ -1,5 +1,5 @@
 <div class="messages-page">
-  <div class="messages-inner">
+  <div class="messages-inner" [class.chat-open]="selectedConversation()">
 
     <aside class="convos-sidebar">
       <div class="convos-header">
@@ -62,6 +62,14 @@
         </div>
       } @else {
 
+        <!-- Phone only: the list and the chat share the screen, so the chat needs a way back -->
+        <button type="button" class="chat-back" (click)="closeChat()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+          All messages
+        </button>
+
         <!-- Clickable chat header → public profile -->
         <a [routerLink]="['/user', getOtherParticipant(selectedConversation()!)._id]" class="chat-header chat-header-link">
           <div class="chat-header-avatar">
@@ -91,7 +99,7 @@
           @if (messagesLoading()) {
             <div class="messages-loading"><div class="spinner"></div></div>
           } @else if (convoService.messages().length === 0) {
-            <div class="messages-start"><p>No messages yet. Say hello! 👋</p></div>
+            <div class="messages-start"><p>No messages yet. Send the first one.</p></div>
           } @else {
             @for (msg of convoService.messages(); track msg._id) {
               <div class="msg-wrap" [class.msg-mine]="isMyMessage(msg)" [class.msg-theirs]="!isMyMessage(msg)">

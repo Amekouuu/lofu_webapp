@@ -134,11 +134,11 @@
   font-size: 0.65rem;
   font-weight: 700;
   padding: 0.1rem 0.45rem;
-  border-radius: 999px;
+  border-radius: var(--radius-sm);
 }
 
-.badge-lost  { background: #fef2f2; color: #ef4444; }
-.badge-found { background: #f0fdf4; color: #22c55e; }
+.badge-lost  { background: #fef2f2; color: #b91c1c; }
+.badge-found { background: #f0fdf4; color: #15803d; }
 
 /* ── Chat area ── */
 .chat-area {
@@ -371,13 +371,44 @@
 .chat-send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
 /* ── Responsive ── */
+/* Back button: only shown on a phone, where the list and the chat take turns on one screen. */
+.chat-back {
+  display: none;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 44px;
+  padding: 0 1rem;
+  background: var(--white);
+  border: none;
+  border-bottom: 1px solid var(--border);
+  color: var(--primary);
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
 @media (max-width: 768px) {
   .messages-inner {
     grid-template-columns: 1fr;
   }
 
-  .convos-sidebar {
+  /* One pane at a time: the list, or (after picking a chat) the chat. */
+  .chat-area {
     display: none;
+  }
+
+  .messages-inner.chat-open .convos-sidebar {
+    display: none;
+  }
+
+  .messages-inner.chat-open .chat-area {
+    display: flex;
+  }
+
+  .chat-back {
+    display: flex;
   }
 }
 

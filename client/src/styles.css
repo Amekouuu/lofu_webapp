@@ -9,20 +9,21 @@
   --text-body: #374151;
   --text-muted: #6b7280;
   --text-light: #9ca3af;
-  --border: #e5e7eb;
+  --border: #e6e3dd;
   --border-focus: #5c6ef8;
-  --bg: #f9fafb;
+  --bg: #f7f6f3;
   --white: #ffffff;
   --error: #ef4444;
   --success: #22c55e;
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
-  --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
-  --shadow-lg: 0 10px 40px rgba(0,0,0,0.10);
+  --shadow-sm: 0 1px 2px rgba(16,24,40,0.05), 0 1px 3px rgba(16,24,40,0.06);
+  --shadow-md: 0 2px 4px rgba(16,24,40,0.04), 0 8px 24px rgba(16,24,40,0.07);
+  --shadow-lg: 0 4px 8px rgba(16,24,40,0.04), 0 20px 48px rgba(16,24,40,0.10);
   --radius-sm: 6px;
   --radius-md: 10px;
   --radius-lg: 16px;
-  --font-display: 'Fraunces', Georgia, serif;
-  --font-body: 'DM Sans', sans-serif;
+  /* One family for everything; headings get weight and tighter spacing instead of a second font. */
+  --font-display: 'DM Sans', system-ui, sans-serif;
+  --font-body: 'DM Sans', system-ui, sans-serif;
 }
 
 /* ─── Dark Mode ─── */
@@ -84,6 +85,8 @@ html, body {
 }
 
 a { color: inherit; text-decoration: none; }
+
+h1, h2, h3, h4 { letter-spacing: -0.02em; }
 
 /* Claim buttons are disabled while an approve/reject request is running */
 .btn-approve:disabled, .btn-reject:disabled { opacity: 0.6; cursor: not-allowed; }
@@ -255,30 +258,7 @@ img { max-width: 100%; display: block; }
   gap: 1rem;
 }
 
-/* ─── Auth actions row ─── */
-.auth-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 1.5rem;
-}
-
-.auth-checkbox {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.875rem;
-  color: var(--text-body);
-  cursor: pointer;
-}
-
-.auth-checkbox input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
-  cursor: pointer;
-  accent-color: var(--primary);
-}
-
+/* ─── Auth links ─── */
 .auth-link {
   color: var(--primary);
   font-size: 0.875rem;

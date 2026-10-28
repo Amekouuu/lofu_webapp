@@ -44,7 +44,7 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.45rem 1rem;
-  border-radius: 999px;
+  border-radius: var(--radius-md);
   border: 1.5px solid var(--border);
   background: var(--white);
   font-size: 0.875rem;
@@ -69,7 +69,7 @@
 .filter-count {
   background: rgba(255,255,255,0.25);
   padding: 0.05rem 0.45rem;
-  border-radius: 999px;
+  border-radius: var(--radius-sm);
   font-size: 0.75rem;
   font-weight: 700;
 }
@@ -180,6 +180,7 @@
   border-radius: var(--radius-lg);
   overflow: hidden;
   cursor: pointer;
+  box-shadow: var(--shadow-sm);
   transition: transform 0.15s, box-shadow 0.15s;
 }
 
@@ -239,20 +240,21 @@
 
 .card-badge {
   flex-shrink: 0;
-  padding: 0.25rem 0.85rem;
-  border-radius: 999px;
-  font-size: 0.78rem;
-  font-weight: 700;
+  padding: 0.2rem 0.65rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 600;
 }
 
+/* On the navy card: translucent tints, not saturated fills */
 .badge-lost {
-  background: #ef4444;
-  color: var(--white);
+  background: rgba(248, 113, 113, 0.18);
+  color: #fecaca;
 }
 
 .badge-found {
-  background: #22c55e;
-  color: var(--white);
+  background: rgba(74, 222, 128, 0.16);
+  color: #bbf7d0;
 }
 
 .card-divider {
@@ -293,19 +295,19 @@
 .card-action-btn {
   width: 100%;
   padding: 0.65rem;
-  background: #4ade80;
-  color: #14532d;
+  background: var(--white);
+  color: #1a2b6b;
   border: none;
-  border-radius: 999px;
+  border-radius: var(--radius-md);
   font-size: 0.9rem;
-  font-weight: 700;
+  font-weight: 600;
   cursor: pointer;
   transition: background 0.15s, transform 0.1s;
   margin-top: 0.25rem;
 }
 
 .card-action-btn:hover {
-  background: #22c55e;
+  background: var(--primary-light);
 }
 
 .card-action-btn:active {

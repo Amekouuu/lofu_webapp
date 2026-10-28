@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, AfterViewChecked, signal, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewChecked, effect, signal, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -32,6 +32,12 @@ export class Messages implements OnInit, OnDestroy, AfterViewChecked {
     private toast: ToastService,
   ) {
     this.currentUser = this.authService.currentUser;
+
+    // A message arriving live (or being sent) should bring the newest one into view.
+    effect(() => {
+      this.convoService.messages();
+      this.shouldScroll = true;
+    });
   }
 
   ngOnInit() {
@@ -70,6 +76,13 @@ export class Messages implements OnInit, OnDestroy, AfterViewChecked {
       },
       error: () => this.messagesLoading.set(false),
     });
+  }
+
+  closeChat() {
+    const convo = this.selectedConversation();
+    if (convo) this.convoService.leaveConversation(convo._id);
+    this.selectedConversation.set(null);
+    this.convoService.messages.set([]);
   }
 
   sendMessage() {

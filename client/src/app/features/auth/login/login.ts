@@ -23,7 +23,6 @@ export class Login {
 
   emailOrUsername = '';
   password = '';
-  rememberMe = false;
   showPassword = signal(false);
   isLoading = signal(false);
   errorMessage = signal('');

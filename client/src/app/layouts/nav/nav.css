@@ -43,7 +43,7 @@
 
 .nav-link {
   padding: 0.4rem 0.9rem;
-  border-radius: 999px;
+  border-radius: var(--radius-md);
   font-size: 0.9rem;
   color: var(--text-body);
   transition: background 0.15s, color 0.15s;
@@ -59,7 +59,6 @@
   background: var(--primary-light);
   color: var(--primary);
   font-weight: 600;
-  outline: 1.5px solid var(--primary);
 }
 
 /* Right actions */
@@ -157,7 +156,7 @@
   color: var(--text-body);
   border: 1.5px solid var(--border);
   background: none;
-  border-radius: 999px;
+  border-radius: var(--radius-md);
   padding: 0.4rem 1rem;
   transition: border-color 0.15s, color 0.15s;
 }
@@ -171,7 +170,7 @@
   font-size: 0.875rem;
   color: var(--white);
   background: var(--primary);
-  border-radius: 999px;
+  border-radius: var(--radius-md);
   padding: 0.4rem 1.1rem;
   font-weight: 600;
   transition: background 0.15s;

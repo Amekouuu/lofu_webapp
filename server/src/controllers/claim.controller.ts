@@ -3,6 +3,7 @@ import { supabase } from '../config/supabase';
 import { createMessage } from '../db/chat';
 import { ClaimRow, USER_SUMMARY_COLUMNS, toClaim } from '../db/mappers';
 import { isUniqueViolation, isUuid } from '../db/utils';
+import { notifyUsers } from '../realtime';
 
 // The `!post_id` / `!claimant_id` hints pick the exact foreign key, because posts and
 // claims also reference each other through posts.approved_claim_id.
@@ -211,6 +212,7 @@ export async function approveClaim(req: Request, res: Response): Promise<void> {
     });
 
     if (!rpcError) {
+      notifyUsers([post.author_id, claim.claimant_id]);
       res.status(200).json({ success: true, message: 'Claim approved and post marked as resolved' });
       return;
     }
@@ -284,6 +286,7 @@ export async function approveClaim(req: Request, res: Response): Promise<void> {
     // Auto-generate opening message from the post owner
     const autoText = `🎉 Claim approved! "${post.item_name}" has been matched. Please coordinate here to arrange the return. Good luck! 🤝`;
     await createMessage(conversationId, post.author_id, autoText);
+    notifyUsers([post.author_id, claim.claimant_id]);
 
     res.status(200).json({ success: true, message: 'Claim approved and post marked as resolved' });
   } catch (error) {

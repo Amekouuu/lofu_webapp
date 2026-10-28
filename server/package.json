@@ -8,7 +8,7 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "test": "node --require ts-node/register/transpile-only --test \"tests/*.test.ts\"",
-    "test:integration": "node tests/integration/smoke.mjs && node tests/integration/limiter.mjs && node tests/integration/account-security.mjs"
+    "test:integration": "node tests/integration/smoke.mjs && node tests/integration/limiter.mjs && node tests/integration/account-security.mjs && node tests/integration/realtime.mjs"
   },
   "keywords": [],
   "author": "",

@@ -1,6 +1,6 @@
 /* ── About Hero ── */
 .about-hero {
-  background: linear-gradient(to bottom, #FFFFFF 0%, #A9D0E5 100%);
+  background: linear-gradient(to bottom, #FFFFFF 0%, #dbe7f5 100%);
   padding: 6rem 0;
 }
 
@@ -33,10 +33,10 @@
 /* Button */
 .btn-learn {
   display: inline-block;
-  background: #000000;
+  background: #1a2b6b;
   color: #ffffff;
-  padding: 1rem 3rem;
-  border-radius: 999px;
+  padding: 0.85rem 2rem;
+  border-radius: var(--radius-md);
   text-decoration: none;
   font-weight: 600;
   font-size: 0.95rem;
@@ -157,14 +157,14 @@
 .how-number {
   width: 60px;
   height: 60px;
-  background-color: #000000;
-  color: #ffffff;
+  background-color: var(--primary-light);
+  color: var(--primary);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.5rem;
   font-weight: 800;
-  border-radius: 12px; 
+  border-radius: var(--radius-md);
   margin-bottom: 2rem;
 }
 
@@ -184,7 +184,7 @@
 
 /* ── Mission Section ── */
 .mission-section {
-  background: linear-gradient(to bottom, #FFFFFF 0%, #A9D0E5 100%);
+  background: linear-gradient(to bottom, #FFFFFF 0%, #dbe7f5 100%);
   padding: 4rem 0;
   text-align: center;
 }
@@ -223,7 +223,7 @@
 
 .quote-icon {
   font-size: 5rem;
-  font-family: serif;
+  font-family: var(--font-display);
   color: #a9c2d6; /* Subtle blue/grey for the quote marks */
   line-height: 1;
   margin-bottom: -1.5rem; /* Pulls the text closer to the quote icon */

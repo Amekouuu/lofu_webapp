@@ -204,27 +204,21 @@ async function main() {
   check('lastMessage preview updated', convA2.body?.conversations?.[0]?.lastMessage === 'hi from B', convA2.body?.conversations?.[0]?.lastMessage);
 
   // ── Socket.IO chat ──────────────────────────────────────────────
-  const sA = io(BASE, { transports: ['websocket'] });
-  const sB = io(BASE, { transports: ['websocket'] });
-  const sC = io(BASE, { transports: ['websocket'] });
-  await Promise.all([once(sA, 'connect'), once(sB, 'connect'), once(sC, 'connect')]);
-  check('3 sockets connect', sA.connected && sB.connected && sC.connected);
-  sA.emit('join_conversation', convId); sB.emit('join_conversation', convId);
-  await new Promise((r) => setTimeout(r, 300));
+  // (the full socket security matrix lives in realtime.mjs; this is the happy path)
+  const sA = io(BASE, { transports: ['websocket'], auth: { token: A.token } });
+  const sB = io(BASE, { transports: ['websocket'], auth: { token: B.token } });
+  const sC = io(BASE, { transports: ['websocket'], reconnection: false });   // no login token
+  await Promise.all([once(sA, 'connect'), once(sB, 'connect'), once(sC, 'connect_error')]);
+  check('sockets with a login token connect, one without is refused', sA.connected && sB.connected && !sC.connected);
+  const joined = await new Promise((r) => sB.emit('join_conversation', convId, r));
+  check('participant can listen to the chat', joined === true, joined);
   const gotB = once(sB, 'new_message');
-  sA.emit('send_message', { conversationId: convId, senderId: A.id, content: 'hello via socket' });
+  const viaRest = await call('POST', `/conversations/${convId}/messages`, A.token, { content: 'hello via socket' });
   const ev = await gotB;
-  check('socket message broadcast to B with DB-sourced sender',
-    ev?.content === 'hello via socket' && ev.sender?.fullName === A.fullName && UUID.test(ev._id), ev);
-  const errC = once(sC, 'message_error');
-  sC.emit('send_message', { conversationId: convId, senderId: C.id, content: 'sneaky' });
-  check('socket send by non-participant -> message_error', (await errC) !== null);
-  const errBad = once(sA, 'message_error');
-  sA.emit('send_message', { conversationId: 'nope', senderId: A.id, content: 'x' });
-  check('socket send with bad ids -> message_error', (await errBad) !== null);
+  check('a saved message reaches the other participant live',
+    viaRest.status === 201 && ev?.conversationId === convId && ev.message?.content === 'hello via socket' && UUID.test(ev.message?._id), ev);
   const msgs3 = await call('GET', `/conversations/${convId}/messages`, A.token);
-  check('socket message persisted (3 total, no sneaky one)',
-    msgs3.body?.messages?.length === 3 && !msgs3.body.messages.some((m) => m.content === 'sneaky'), msgs3.body?.messages?.map((m) => m.content));
+  check('message persisted (3 total)', msgs3.body?.messages?.length === 3, msgs3.body?.messages?.map((m) => m.content));
   sA.close(); sB.close(); sC.close();
 
   // ── reject path on a second post ────────────────────────────────

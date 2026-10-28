@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { supabase } from '../config/supabase';
-import { createMessage, isConversationParticipant } from '../db/chat';
+import { createMessage, getParticipantIds, isConversationParticipant } from '../db/chat';
 import {
   ConversationRow,
   MESSAGE_SELECT,
@@ -10,6 +10,7 @@ import {
   toMessage,
 } from '../db/mappers';
 import { isUuid } from '../db/utils';
+import { publishMessage } from '../realtime';
 
 const CONVERSATION_SELECT = [
   'id, post_id, claim_id, last_message, last_message_at, created_at, updated_at',
@@ -127,6 +128,13 @@ export async function sendMessage(req: Request, res: Response): Promise<void> {
     const message = await createMessage(id, req.user!._id, content.trim());
 
     res.status(201).json({ success: true, message });
+
+    // The message is saved and the sender has their answer; telling the other person is best effort.
+    try {
+      publishMessage(id, message, await getParticipantIds(id));
+    } catch (error) {
+      console.error('Publish message error:', error);
+    }
   } catch (error) {
     console.error('Send message error:', error);
     res.status(500).json({ success: false, message: 'Failed to send message' });

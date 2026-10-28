@@ -22,7 +22,7 @@
 
 /* ── Hero ── */
 .hero {
-  background: linear-gradient(to bottom, #FFFFFF 0%, #A9D0E5 100%);
+  background: linear-gradient(to bottom, #FFFFFF 0%, #dbe7f5 100%);
   padding: 5rem 0 5rem;
 }
 
@@ -126,16 +126,6 @@
   color: var(--text-muted);
   line-height: 1.6;
   margin-bottom: 0.75rem;
-}
-
-.feature-link {
-  font-size: 0.8rem;
-  color: var(--text-muted);
-  transition: color 0.15s;
-}
-
-.feature-link:hover {
-  color: var(--primary);
 }
 
 .why-quote {
@@ -253,7 +243,7 @@
 
 /* ── CTA section ── */
 .cta-section {
-  background: linear-gradient(to bottom, #FFFFFF 0%, #A9D0E5 100%);
+  background: linear-gradient(to bottom, #FFFFFF 0%, #dbe7f5 100%);
   padding: 5rem 0;
   border-top: 1px solid #c7d9f0;
 }

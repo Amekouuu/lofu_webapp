@@ -72,14 +72,6 @@
         </button>
       </div>
 
-      <div class="auth-row">
-        <label class="auth-checkbox">
-          <input type="checkbox" [(ngModel)]="rememberMe" name="rememberMe" />
-          Remember me
-        </label>
-        <button type="button" class="auth-link">Forgot Password</button>
-      </div>
-
       <button type="submit" class="btn-primary" [disabled]="isLoading()">
         @if (isLoading()) { Logging in… } @else { Login }
       </button>

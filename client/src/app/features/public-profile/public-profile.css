@@ -98,7 +98,7 @@
   background: var(--primary-light);
   color: var(--primary);
   padding: 0.2rem 0.65rem;
-  border-radius: 999px;
+  border-radius: var(--radius-sm);
   font-weight: 600;
   text-transform: capitalize;
   margin-bottom: 0.5rem;
@@ -195,24 +195,24 @@
 /* Badges */
 .type-badge {
   font-size: 0.7rem;
-  font-weight: 700;
+  font-weight: 600;
   padding: 0.15rem 0.6rem;
-  border-radius: 999px;
+  border-radius: var(--radius-sm);
 }
 
-.badge-lost  { background: #ef4444; color: #ffffff; }
-.badge-found { background: #22c55e; color: #ffffff; }
+.badge-lost  { background: #fef2f2; color: #b91c1c; }
+.badge-found { background: #f0fdf4; color: #15803d; }
 
 .status-badge {
   font-size: 0.7rem;
-  font-weight: 700;
+  font-weight: 600;
   padding: 0.15rem 0.6rem;
-  border-radius: 999px;
+  border-radius: var(--radius-sm);
 }
 
-.status-active   { background: #eff6ff; color: #3b82f6; }
-.status-pending  { background: #fffbeb; color: #f59e0b; }
-.status-resolved { background: #f0fdf4; color: #22c55e; }
+.status-active   { background: #eff6ff; color: #1d4ed8; }
+.status-pending  { background: #fffbeb; color: #b45309; }
+.status-resolved { background: #f0fdf4; color: #15803d; }
 
 /* ── Responsive ── */
 @media (max-width: 640px) {

@@ -131,17 +131,17 @@
 
 .type-badge, .status-badge {
   font-size: 0.75rem;
-  font-weight: 700;
+  font-weight: 600;
   padding: 0.25rem 0.75rem;
-  border-radius: 999px;
+  border-radius: var(--radius-sm);
 }
 
-.badge-lost    { background: #fef2f2; color: #ef4444; }
-.badge-found   { background: #f0fdf4; color: #22c55e; }
-.badge-active  { background: #eff6ff; color: #3b82f6; }
-.badge-pending { background: #fffbeb; color: #f59e0b; }
-.badge-resolved{ background: #f0fdf4; color: #22c55e; }
-.badge-rejected{ background: #fef2f2; color: #ef4444; }
+.badge-lost    { background: #fef2f2; color: #b91c1c; }
+.badge-found   { background: #f0fdf4; color: #15803d; }
+.badge-active  { background: #eff6ff; color: #1d4ed8; }
+.badge-pending { background: #fffbeb; color: #b45309; }
+.badge-resolved{ background: #f0fdf4; color: #15803d; }
+.badge-rejected{ background: #fef2f2; color: #b91c1c; }
 
 .info-divider {
   height: 1px;
@@ -478,9 +478,9 @@
 
 .claim-badge {
   font-size: 0.7rem;
-  font-weight: 700;
+  font-weight: 600;
   padding: 0.15rem 0.6rem;
-  border-radius: 999px;
+  border-radius: var(--radius-sm);
 }
 
 .claim-detail {
